@@ -19,6 +19,7 @@ Int_t Ana::AnalysisJets(vector<LParticle> JetsTrue, vector<LParticle> JetsReco) 
 		double etaT = L2.PseudoRapidity();
 		double massT =  L2.M();
                 double btagT=(double)tjet.GetType(); // get  b-quark in 10x100%
+                double jetrT=(double)(tjet.GetCharge()/10000.0); // get jet radius 
 
 		for (int m=0; m<nBins-1; m++){
 			double dmin=eBins[m];
@@ -53,6 +54,7 @@ Int_t Ana::AnalysisJets(vector<LParticle> JetsTrue, vector<LParticle> JetsReco) 
 			float eta = L1.PseudoRapidity();
 			float mass  = L1.M();
                         btag  = (float)rjet.GetType();
+                        double jetr=(double)(rjet.GetCharge()/10000.0); // get jet radius 
 
 			vector<float> input;
 			vector<float> output;
@@ -60,11 +62,13 @@ Int_t Ana::AnalysisJets(vector<LParticle> JetsTrue, vector<LParticle> JetsReco) 
 			input.push_back((float)etaT);
 			input.push_back((float)phiT);
 			input.push_back((float)massT);
+                        input.push_back((float)jetrT);
 
 			output.push_back(pt);
 			output.push_back(eta);
 			output.push_back(phi);
 			output.push_back(mass);
+                        output.push_back(jetr);
 
 			// push vectors
 			finput_jets.push_back(input);
@@ -120,11 +124,13 @@ Int_t Ana::AnalysisJets(vector<LParticle> JetsTrue, vector<LParticle> JetsReco) 
 				float etaT=input[1];
 				float phiT=input[2];
 				float massT=input[3];
+                                float jetRT=input[4];
 
 				float pt=output[0];
 				float eta=output[1];
 				float phi=output[2];
 				float mass=output[3];
+                                float jetR=output[4];
 
 
 				if (ptT>dmin && ptT<=dmax) {
@@ -184,7 +190,7 @@ Int_t Ana::AnalysisJets(vector<LParticle> JetsTrue, vector<LParticle> JetsReco) 
                                         uinput[1] = massIN;
                                         uinput[2] = etaIN;
                                         uinput[3] = phiIN;
-                                        uinput[4] = 0.0f; // not used 
+                                        uinput[4] = jetRT; 
 
                                         // eta and phi are sliced for ANN
                                         // this is needed to reproduce spacial defects 

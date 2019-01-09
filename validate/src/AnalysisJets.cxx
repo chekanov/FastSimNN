@@ -73,6 +73,7 @@ Int_t Ana::AnalysisJets(vector<LParticle> JetsTrue, vector<LParticle> JetsReco) 
 		double etaT = L2.PseudoRapidity();
 		double massT =  L2.M();
 		double btagT =  (double)tjet.GetType(); // fraction of b-quark momenta in 10*100%
+                double jetrT=(double)(tjet.GetCharge()/10000.0); // get jet radius 
 
 		if (ptT>minPT && abs(etaT)<maxEta) {
 			m_gjetpt.push_back(ptT);
@@ -166,7 +167,7 @@ Int_t Ana::AnalysisJets(vector<LParticle> JetsTrue, vector<LParticle> JetsReco) 
 				uinput[1] = massIN;
 				uinput[2] = etaIN;
 				uinput[3] = phiIN;
-                                uinput[4] = 0.0f;  // not used 
+                                uinput[4] = (float)jetrT; 
 
 				// eta and phi are sliced for ANN
 				// this is needed to reproduce spacial defects

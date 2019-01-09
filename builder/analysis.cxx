@@ -187,7 +187,8 @@ int main(int argc, char *argv[])
 				Bool_t BtagOk = ( jet->BTag & (1 << i) );
 				if (BtagOk) p.SetType(1);
 				//if (p.GetType() >0) cout << "reco B-tagging! " << endl;
-
+                                double jetRad=sqrt((jet->DeltaEta)*(jet->DeltaEta) + (jet->DeltaPhi)*(jet->DeltaPhi));
+                                p.SetCharge( (int)(jetRad*10000) );
 				p.SetP(l);
 				ana.h_jetpt->Fill(jet->PT);
 				JetsReco.push_back(p);
@@ -245,6 +246,8 @@ int main(int argc, char *argv[])
 				l.SetPtEtaPhiM(jet->PT,jet->Eta,jet->Phi,jet->Mass);
 				LParticle p;
 				p.SetType((int)(btag_fracmom));
+                                double jetRad=sqrt((jet->DeltaEta)*(jet->DeltaEta) + (jet->DeltaPhi)*(jet->DeltaPhi)); 
+                                p.SetCharge( (int)(jetRad*10000) );  
 				//Bool_t BtagOk = ( jet->BTag & (1 << i) );
 				//if (BtagOk) p.SetType(1);
 				//if (p.GetType() >0) cout << "truth B-tagging! " << endl;

@@ -195,6 +195,8 @@ int main(int argc, char *argv[])
                                 p.SetType(0);
                                 Bool_t BtagOk = ( jet->BTag & (1 << i) );
                                 if (BtagOk) p.SetType(1);
+                                double jetRad=sqrt((jet->DeltaEta)*(jet->DeltaEta) + (jet->DeltaPhi)*(jet->DeltaPhi));
+                                p.SetCharge( (int)(jetRad*10000) );
 				ana.h_jetpt->Fill(jet->PT);
 				JetsReco.push_back(p);
 
@@ -227,6 +229,8 @@ int main(int argc, char *argv[])
 				LParticle p;
 				p.SetP(l);
                                 p.SetType((int)btag_fracmom);
+                                double jetRad=sqrt((jet->DeltaEta)*(jet->DeltaEta) + (jet->DeltaPhi)*(jet->DeltaPhi));
+                                p.SetCharge( (int)(jetRad*10000) );
                                 //Bool_t BtagOk = ( jet->BTag & (1 << i) );
                                 //if (BtagOk) p.SetType(1);
 				ana.h_jetpt_truth->Fill(jet->PT);
