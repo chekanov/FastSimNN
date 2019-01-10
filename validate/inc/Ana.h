@@ -185,46 +185,46 @@ protected:
   TH1D *h_jetres100;
   TH1D *h_jetres1000;
 
-
-   TH1D *h_in1_jet;
-   TH1D *h_in2_jet;
-   TH1D *h_in3_jet;
-   TH1D *h_in4_jet;
+  TH1D *h_in1_jet;
+  TH1D *h_in2_jet;
+  TH1D *h_in3_jet;
+  TH1D *h_in4_jet;
+  TH1D *h_in5_jet;
 
    // mu
-   TH1D *h_in1_mu;
-   TH1D *h_in2_mu;
-   TH1D *h_in3_mu;
-   TH1D *h_in4_mu;
+  TH1D *h_in1_mu;
+  TH1D *h_in2_mu;
+  TH1D *h_in3_mu;
+  TH1D *h_in4_mu;
 
 
-   TH1D *h_out1_jet;
-   TH1D *h_out2_jet;
-   TH1D *h_out3_jet;
-   TH1D *h_out4_jet;
+  TH1D *h_out1_jet;
+  TH1D *h_out2_jet;
+  TH1D *h_out3_jet;
+  TH1D *h_out4_jet;
 
-   TH1D *h_out1_mu;
-   TH1D *h_out2_mu;
-   TH1D *h_out3_mu;
-   TH1D *h_out4_mu;
+  TH1D *h_out1_mu;
+  TH1D *h_out2_mu;
+  TH1D *h_out3_mu;
+  TH1D *h_out4_mu;
 
 
-   TH1D *h_out5_jet_eff;
-   TH1D *h_out6_jet_btag;
-   TH1D *h_out5_mu_eff;
-   TH1D *h_out5_ph_eff;
-   TH1D *h_out5_el_eff;
+  TH1D *h_out5_jet_eff;
+  TH1D *h_out6_jet_btag;
+  TH1D *h_out5_mu_eff;
+  TH1D *h_out5_ph_eff;
+  TH1D *h_out5_el_eff;
 
    //random bins generated
-   TH1D *h_rout1_jet;
-   TH1D *h_rout2_jet;
-   TH1D *h_rout3_jet;
-   TH1D *h_rout4_jet;
+  TH1D *h_rout1_jet;
+  TH1D *h_rout2_jet;
+  TH1D *h_rout3_jet;
+  TH1D *h_rout4_jet;
 
-   TH1D *h_rout1_mu;
-   TH1D *h_rout2_mu;
-   TH1D *h_rout3_mu;
-   TH1D *h_rout4_mu;
+  TH1D *h_rout1_mu;
+  TH1D *h_rout2_mu;
+  TH1D *h_rout3_mu;
+  TH1D *h_rout4_mu;
 
 
    // reco jets

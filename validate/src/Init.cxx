@@ -285,10 +285,11 @@ Int_t Ana::Init() {
 	h_etacor = new TH1D("jet_etacor", "Eta correction", 200, 0.0, 3);
 	h_phicor = new TH1D("jet_phicor", "Phi correction", 200, 0.0, 3);
 
-	h_in1_jet = new TH1D("in1_jet", "in1 jet", nBinsNN, -1.1, 1.1);
-	h_in2_jet = new TH1D("in2_jet", "in2 jet", nBinsNN, -1.1, 1.1);
-	h_in3_jet = new TH1D("in3_jet", "in3 jet", nBinsNN, -1.1, 1.1);
-	h_in4_jet = new TH1D("in4_jet", "in4 jet", nBinsNN, -1.1, 1.1);
+	h_in1_jet = new TH1D("in1_jet", "in1 pt jet", nBinsNN, -1.1, 1.1);
+	h_in2_jet = new TH1D("in2_jet", "in2 eta jet", nBinsNN, -1.1, 1.1);
+	h_in3_jet = new TH1D("in3_jet", "in3 phi jet", nBinsNN, -1.1, 1.1);
+	h_in4_jet = new TH1D("in4_jet", "in4 M jet", nBinsNN, -1.1, 1.1);
+        h_in5_jet = new TH1D("in5_jet", "in5 dR", nBinsNN, -1.1, 1.1);
 
 	h_out1_jet = new TH1D("out1_jet", "out1", nBinsNN, -1.1, 1.1);
 	h_out2_jet = new TH1D("out2_jet", "out2", nBinsNN, -1.1, 1.1);
@@ -437,8 +438,8 @@ int Ana::findCeil(int  arr[], int r, int l, int h)
         }
         int va=(arr[l] >= r) ? l : -1;
         // if negative, assume no correction (center)
-        // if (va<0) va=(int)(h/2.0);
-        if (va<0)  va=rand() % h; // random smearing  
+        if (va<0) va=(int)(h/2.0);
+        //if (va<0)  va=rand() % h; // random smearing  
         return va;
 }
 
@@ -464,8 +465,8 @@ int Ana::myRand(int arr[], int freq[], int n)
                 return arr[indexc];
         }
 
-        // return (int)(n/2.0); // assume no correction when error
-           int va=rand() % n;
+          //int va=rand() % n;
+           int va=(int)(n/2.0); // assume no correction when error
            return va; // random smearing  
 }
 

@@ -68,12 +68,14 @@ Int_t Ana::AnalysisJets(vector<LParticle> JetsTrue, vector<LParticle> JetsReco) 
 		LParticle tjet = (LParticle)JetsTrue.at(j);
 		TLorentzVector L2 = tjet.GetP();
 
-		double phiT = L2.Phi();
-		double ptT =  L2.Perp();
-		double etaT = L2.PseudoRapidity();
-		double massT =  L2.M();
-		double btagT =  (double)tjet.GetType(); // fraction of b-quark momenta in 10*100%
-                double jetrT=(double)(tjet.GetCharge()/10000.0); // get jet radius 
+		float phiT = L2.Phi();
+		float ptT =  L2.Perp();
+		float etaT = L2.PseudoRapidity();
+		float massT = L2.M();
+		float btagT = (float)tjet.GetType(); // fraction of b-quark momenta in 10*100%
+                float jetrT=(float)(tjet.GetCharge()/10000.0); // get jet radius 
+                float jetE=L2.E(); // energy 
+                jetrT =  jetrT / sqrt(jetE); // effective jet radius in GeV-1/2 (sqrt to increase values) 
 
 		if (ptT>minPT && abs(etaT)<maxEta) {
 			m_gjetpt.push_back(ptT);
@@ -167,7 +169,7 @@ Int_t Ana::AnalysisJets(vector<LParticle> JetsTrue, vector<LParticle> JetsReco) 
 				uinput[1] = massIN;
 				uinput[2] = etaIN;
 				uinput[3] = phiIN;
-                                uinput[4] = (float)jetrT; 
+                                uinput[4] = jetrT; 
 
 				// eta and phi are sliced for ANN
 				// this is needed to reproduce spacial defects
@@ -306,6 +308,7 @@ Int_t Ana::AnalysisJets(vector<LParticle> JetsTrue, vector<LParticle> JetsReco) 
 				h_in2_jet->Fill(etaIN);
 				h_in3_jet->Fill(phiIN);
 				h_in4_jet->Fill(massIN);
+                                h_in5_jet->Fill(jetrT);
 
 				if (phi>PI || phi<-PI) phi=phiT; // overcorrection!
 
@@ -317,7 +320,7 @@ Int_t Ana::AnalysisJets(vector<LParticle> JetsTrue, vector<LParticle> JetsReco) 
                                 // structure of input the same but mass is replaced with b-tagging
                                  uinput[3] = (float)((btagT/500.) - 1); // normalize to (-1,1)
                                  if (uinput[3]>1.0f)  uinput[3]=1.0f;
-                                 uinput[4]=0; // used to be charge 
+                                 uinput[4]=jetrT; // effective jet size 
 
 
 				fann_type * output5 = fann_run(ann5_jets[m], uinput);

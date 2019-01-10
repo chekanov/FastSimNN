@@ -185,8 +185,8 @@ leg1.SetTextSize(0.04);
 # leg1.AddEntry(f1,s1,"l")
 leg1.Draw("same");
 
-h1=TGraphSkipRange(h1,-0.5, 0.5 )
-h2=TGraphSkipRange(h2,-0.5, 0.5 )
+h1=TGraphSkipRange(h1,-0.4, 0.4 )
+h2=TGraphSkipRange(h2,-0.4, 0.4 )
 
 h1.Draw("pe same")
 h2.SetMarkerColor(2)

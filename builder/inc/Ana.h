@@ -60,7 +60,7 @@ class Ana  {
    static const int num_threads = 16; // number of threads 
    static const int nBins=34;      // number of energy bins 
    static const int nBatch=200000; // number of events in batches for training
-   static const int nEpoch=200;    // max number of epochs 
+   static const int nEpoch=250;    // max number of epochs 
    static const int nBinsNN=201;   // number of bins for resolution plots
    static const int MinEntries=20; // min nr of entries in pT for NN training (per bunch);
    static const int num_layers = 3;
@@ -233,6 +233,7 @@ protected:
    TH1D *h_in2;
    TH1D *h_in3;
    TH1D *h_in4;
+   TH1D *h_in5;
 
    TH1D *h_out1;
    TH1D *h_out2;

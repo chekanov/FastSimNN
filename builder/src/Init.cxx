@@ -261,10 +261,11 @@ Int_t Ana::Init() {
 	h_dR = new TH1D("jet_dR", "truth-jet distance", 500, 0, 7);
 
 
-	h_in1 = new TH1D("in1_jet", "in1", nBinsNN, -1.1, 1.1);
-	h_in2 = new TH1D("in2_jet", "in2", nBinsNN, -1.1, 1.1);
-	h_in3 = new TH1D("in3_jet", "in3", nBinsNN, -1.1, 1.1);
-	h_in4 = new TH1D("in4_jet", "in4", nBinsNN, -1.1, 1.1);
+	h_in1 = new TH1D("in1_jet", "in1 pt", nBinsNN, -1.1, 1.1);
+	h_in2 = new TH1D("in2_jet", "in2 et", nBinsNN, -1.1, 1.1);
+	h_in3 = new TH1D("in3_jet", "in3 phi", nBinsNN, -1.1, 1.1);
+	h_in4 = new TH1D("in4_jet", "in4 M", nBinsNN, -1.1, 1.1);
+        h_in5 = new TH1D("in5_jet", "in5 dRjet", nBinsNN, -1.1, 1.1);
 
 	h_out1 = new TH1D("out1_jet", "out1", nBinsNN, -1.1, 1.1);
 	h_out2 = new TH1D("out2_jet", "out2", nBinsNN, -1.1, 1.1);

@@ -14,12 +14,14 @@ Int_t Ana::AnalysisJets(vector<LParticle> JetsTrue, vector<LParticle> JetsReco) 
 	for(unsigned int j = 0; j<JetsTrue.size(); j++){
 		LParticle tjet = (LParticle)JetsTrue.at(j);
 		TLorentzVector L2 = tjet.GetP();
-		double phiT = L2.Phi();
-		double ptT =  L2.Perp();
-		double etaT = L2.PseudoRapidity();
-		double massT =  L2.M();
-                double btagT=(double)tjet.GetType(); // get  b-quark in 10x100%
-                double jetrT=(double)(tjet.GetCharge()/10000.0); // get jet radius 
+		float phiT = L2.Phi();
+		float ptT =  L2.Perp();
+		float etaT = L2.PseudoRapidity();
+		float massT =  L2.M();
+                float btagT=(float)tjet.GetType(); // get  b-quark in 10x100%
+                float jetrT=(float)(tjet.GetCharge()/10000.0); // get jet radius in Eta and Phi 
+                float jetE=L2.E(); // energy 
+                jetrT =  jetrT / sqrt(jetE); // effective jet radius in GeV-1/2 (sqrt to increase values) 
 
 		for (int m=0; m<nBins-1; m++){
 			double dmin=eBins[m];
@@ -54,16 +56,18 @@ Int_t Ana::AnalysisJets(vector<LParticle> JetsTrue, vector<LParticle> JetsReco) 
 			float eta = L1.PseudoRapidity();
 			float mass  = L1.M();
                         btag  = (float)rjet.GetType();
-                        double jetr=(double)(rjet.GetCharge()/10000.0); // get jet radius 
+                        float jetr=(float)(rjet.GetCharge()/10000.0); // get jet radius 
+                        float jetE=L1.E(); // energy 
+                        jetr=jetr/sqrt(jetE);
 
 			vector<float> input;
 			vector<float> output;
-			input.push_back((float)ptT);
-			input.push_back((float)etaT);
-			input.push_back((float)phiT);
-			input.push_back((float)massT);
-                        input.push_back((float)jetrT);
-
+			input.push_back(ptT);
+			input.push_back(etaT);
+			input.push_back(phiT);
+			input.push_back(massT);
+                        input.push_back(jetrT);
+            
 			output.push_back(pt);
 			output.push_back(eta);
 			output.push_back(phi);
@@ -82,6 +86,7 @@ Int_t Ana::AnalysisJets(vector<LParticle> JetsTrue, vector<LParticle> JetsReco) 
 		input2.push_back((float)etaT);
 		input2.push_back((float)phiT);
                 input2.push_back((float)btagT); // fraction of b-quark momenta in % (100-0) 
+                input2.push_back((float)jetrT); // effective jet size 
 
                 float ibb=-1.0f;
 		float iout=-1.0f; // no match
@@ -130,7 +135,7 @@ Int_t Ana::AnalysisJets(vector<LParticle> JetsTrue, vector<LParticle> JetsReco) 
 				float eta=output[1];
 				float phi=output[2];
 				float mass=output[3];
-                                float jetR=output[4];
+                                //float jetR=output[4];
 
 
 				if (ptT>dmin && ptT<=dmax) {
@@ -255,6 +260,7 @@ Int_t Ana::AnalysisJets(vector<LParticle> JetsTrue, vector<LParticle> JetsReco) 
 					h_in2->Fill(etaIN);
 					h_in3->Fill(phiIN);
 					h_in4->Fill(massIN);
+                                        h_in5->Fill(jetRT);
 
 					h_out1->Fill(ptOUT);
 					h_out2->Fill(etaOUT);
@@ -301,7 +307,9 @@ Int_t Ana::AnalysisJets(vector<LParticle> JetsTrue, vector<LParticle> JetsReco) 
 				float ptT=input2[0];
 				float etaT=input2[1];
 				float phiT=input2[2];
-                                float btagT=(float)input2[3]; // 0 - 1000 
+                                float btagT=input2[3]; // 0 - 1000 
+                                float jetRT=input2[4]; // effective jet radius 
+
                                 // outputs
 				float match=output2[0];
                                 float btag=output2[1];
@@ -320,7 +328,7 @@ Int_t Ana::AnalysisJets(vector<LParticle> JetsTrue, vector<LParticle> JetsReco) 
 					uinput[2]=phiIN;
                                         uinput[3]=(float)((btagT/500.) - 1); // btag normalize (-1,1)  
                                         if (uinput[3]>1.0f) uinput[3]=1.0f;
-                                        uinput[4]=0; // reserved for charge
+                                        uinput[4]=jetRT; // effective jet radius 
 
                                        // sliced input for NN
                                         float etaINSlice[slices_etaphi-1];
