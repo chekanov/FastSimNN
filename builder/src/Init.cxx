@@ -88,12 +88,15 @@ Int_t Ana::Init() {
                         //fann_set_activation_function_output(ann2_jets[m], FANN_LINEAR);
                         fann_randomize_weights(ann2_jets[m],-1.0,1.0);
 
+
+                        // phi uses Linear to address non-linearlinity of sigmoid 
                         ann3_jets[m] = fann_create_standard(num_layers, num_input, num_neurons_hidden_1, num_output);
                         fann_set_activation_function_hidden(ann3_jets[m], FANN_SIGMOID_SYMMETRIC);
                         fann_set_activation_function_output(ann3_jets[m], FANN_SIGMOID_SYMMETRIC);
                         //fann_set_activation_function_output(ann3_jets[m], FANN_LINEAR);
                         fann_randomize_weights(ann3_jets[m],-1.0,1.0);
 
+                        // mass uses linear to address non-linearlity of sigmoid 
                         ann4_jets[m] = fann_create_standard(num_layers, num_input, num_neurons_hidden_1, num_output);
                         fann_set_activation_function_hidden(ann4_jets[m], FANN_SIGMOID_SYMMETRIC);
                         fann_set_activation_function_output(ann4_jets[m], FANN_SIGMOID_SYMMETRIC);
