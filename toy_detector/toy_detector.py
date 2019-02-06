@@ -21,13 +21,6 @@ pi=3.14159
 #h1 = H1D("resolution",100, -2, 2.0)
 #-----------------------------------------
 
-
-# suggested values for validation:
-# RESPONSE: 0.97-1.03
-# A:        0.6-0.1
-# B:        0.01-0.03
-
-
 # total number of collision events 
 NrOfEvents=100000
 
@@ -35,21 +28,22 @@ NrOfEvents=100000
 # smearing for energies of jets or particles
 #################################################
 
-RESPONSE=0.97 # on average, energies are shifted by -3%  
+RESPONSE=0.98 # on average, energies are shifted by -2%  
+# suggested variations: (-2%, 2%) 
 
-# In addition, energies are stochatically smeared by a detector 
+# In addition, energies are stochastically smeared by a detector 
 # using this formula: sigma = B*E+A*sqrt(E)
 # Note:  positions are smeared with sigma x10 smaller  
 
 # Smearing for jets: (photons have A=0.1, B=0.0) 
 A=0.50  # stochastic term of a detector smearing for jet 
 B=0.03  # constant term of detector smearing 
-# suggested values for validation:
-# RESPONSE: 0.97-1.03
-# A:        0.6-0.1
+# Suggested variations:
+# RESPONSE: 0.95-1.0 
+# A:        0.6-0.02
 # B:        0.01-0.03
 
-# simulate efficiency of some region in Eta (pseudorapidity) 
+# simulate efficiency of some "bad" region in Eta (pseudorapidity) 
 # assume 80% efficiency for |Eta|>2.5
 # in addition, |Eta|>2.5 has larger resolution (by a factor 3). See below.
 Efficiency=0.8 
@@ -60,15 +54,15 @@ Efficiency=0.8
 def getSmear(v,pt,scale=1):
      """Apply some detector smearing and shift true value v"""
      global A,B,RESPONSE  
-     # assume contant B and stochastic A terms
+     # assume constant B and stochastic A terms
      sigma=scale*(B*pt+A*sqrt(pt))
      return random.gauss(v*RESPONSE, sigma)
 
-# create events with particles
+# create events with particles for each event: 
 for nev in xrange(NrOfEvents):
-         tot_particles=int(abs(random.gauss(mu=50, sigma=20)))
+         tot_particles=int(abs(random.gauss(mu=50, sigma=20))) # number of particles per event is taken at random  
          PT,ETA,PHI,MASS=[],[],[],[]
-         # create physics lists with particles characterzed by pt, eta, phi, mass
+         # create physics lists with particles characterized by pt, eta, phi, mass
          # mimic initial physics distributions
          for i in range(tot_particles):
                    PT.append(abs(random.gauss(mu=0, sigma=2000))) 
@@ -88,7 +82,7 @@ for nev in xrange(NrOfEvents):
               eta =getSmear(ETA[i],PT[i],0.1) # positions are always x10 better measured  
               phi =getSmear(PHI[i],PT[i],0.1) 
               # First remove some particles in eta detector region with low efficiency
-              if (abs(eta)>2.5): # postive eta>2.5 has low efficiency (missing detector module) 
+              if (abs(eta)>2.5): # positive eta>2.5 has low efficiency (missing detector module) 
                          eta =getSmear(ETA[i],PT[i],0.3) # x3 larger smearing 
                          if (random.random()>Efficiency): continue;
 
