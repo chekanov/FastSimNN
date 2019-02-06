@@ -66,7 +66,7 @@ for nev in xrange(NrOfEvents):
          # mimic initial physics distributions
          for i in range(tot_particles):
                    PT.append(abs(random.gauss(mu=0, sigma=2000))) 
-                   ETA.append(random.uniform(3, 3))
+                   ETA.append(random.uniform(-3, 3))
                    PHI.append(random.uniform(-pi, pi))
                    MASS.append(abs(random.gauss(mu=100, sigma=200)))
          ##########################################################
