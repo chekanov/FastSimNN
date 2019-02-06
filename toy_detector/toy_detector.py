@@ -1,6 +1,6 @@
 #!/usr/bin/python2 
 # This is a toy example illustrating a detector response. 
-# It creates a list of particles characterized with 4 values (PT,ETA,PHI,MASS)
+# It creates a random list of particles. Each particle characterized with 4 values (PT,ETA,PHI,MASS)
 # (truth-level). Then it applies some detector smearing and loses to mimic a typical detector
 # ------------
 # How to debug:
