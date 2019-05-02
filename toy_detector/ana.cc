@@ -55,13 +55,8 @@ int myRand(int arr[], int freq[], int n);
 int main(int argc, char **argv)
 {
 
-
-
-
 	// how many slices assume 200 slices
 	const int maxSlice=100;
-
-
 	cout << "\n\n start calculations with " << maxSlice << " slices" << endl;
 
 	if (argc != 2) {
@@ -72,7 +67,6 @@ int main(int argc, char **argv)
 
 	string rtype("-");
 	rtype = argv[1];
-
 
 	// before doing anything, read train data and shuffle
 	const char* trainFile="data/train1.data";
@@ -95,22 +89,14 @@ int main(int argc, char **argv)
 	infile.close();
 	cout << "Nr of events in trained sample=" << Nsample << endl;
 	cout << "Nr of input nodes in the matrix=" << inNodes << endl;
-	//cout << "Nr of output nodes in the matrix=" << outNodes << endl;
-	//exit(0);
 
 	// read data for training..
 	struct fann_train_data * dataTrain = fann_read_train_from_file(trainFile);
-	// we have already scaled data using CM energy
-	//fann_scale_input_train_data(dataTrain, 0, 1);
 	cout << "Shuffle: " << trainFile << endl;
 	fann_shuffle_train_data(dataTrain);
 
-
-
 	cout << "calculate min and max for differences" << endl;
-
 	double cmin = 1e10;  double cmax = -1e10;
-
         int totalEvents = dataTrain-> num_data;
 
 	for (unsigned int nn=0; nn<totalEvents; nn++) {
@@ -122,25 +108,21 @@ int main(int argc, char **argv)
 		//cout <<  nn << " " << dataTrain->num_input << endl;
 	}
 
-
-
-
 	long before;
 	unsigned int num_threads = 16;
 	const unsigned int num_input = inNodes;
 	const unsigned int num_output = maxSlice+1; // plus efficiency
 	const unsigned int num_layers = 3;
 	// numeber in hidden layer 1
-	const unsigned int num_neurons_hidden_1=20; // (int)(inNodes/2.0);
+	const unsigned int num_neurons_hidden_1=50; // (int)(inNodes/2.0);
 	// number in hidden layer 2
 	const unsigned int num_neurons_hidden_2=(int)(inNodes/4.0);
 
 	const double desired_error = (const float) 0.005;
-	const unsigned int max_epochs = 40;
+	const unsigned int max_epochs = 200;
 	const unsigned int epochs_between_reports = 10;
 	// NN name
 	const char* nn_name="nn_out/neural_final.net";
-
 
         string outputfile="data/input.root";
         if (rtype == "run") outputfile="data/output.root";
@@ -357,9 +339,9 @@ int main(int argc, char **argv)
                 ofstream myfile;
                 myfile.open ("data/neuralnet.data"); // output file 
 
-		TH1D * out1res= new TH1D("nn_res", "nn_res",maxSlice,Xmin,Xmax);
-		TH1D * out1eff= new TH1D("nn_eff", "nn_eff",100,0,1.0);
-                TH1D * out2res= new TH1D("predicted_res", "predicted_resolution",maxSlice,Xmin,Xmax);
+		TH1D * out1res= new TH1D("nn_res", "resolution from NN nodes",maxSlice,Xmin,Xmax);
+		TH1D * out1eff= new TH1D("nn_eff", "efficiency from NN nodes",100,0,1.0);
+                TH1D * out2res= new TH1D("predicted_res", "predicted resolution (final)",maxSlice,Xmin,Xmax);
 
 		cout << endl << "Testing network: open " << nn_name << endl;
 		struct fann *ann_new = fann_create_from_file(nn_name);
@@ -399,7 +381,7 @@ int main(int argc, char **argv)
 				// cout << output1[jjj] << endl;
 				float d1=Xmin+jjj* del;
 				//float d2=d1+del;
-                                INSlice[jjj]=(int)( output1[jjj]*1000000 ); // convert to int 
+                                INSlice[jjj]=(int)( output1[jjj]*100000 ); // convert to int 
 				out1res->Fill(d1+0.5*del,(double)INSlice[jjj]); //  
 			}
 
@@ -422,6 +404,7 @@ int main(int argc, char **argv)
                         if (isExist>0) {
                           int BinSelected=myRand(BinOverTrue, INSlice, maxSlice-1); // select random value (bin) assuming frequencies
                           reco_value=BinSelected;
+                          //cout << BinSelected  << endl;
                           out2res->Fill( reco_value );
                         }
 

@@ -1,7 +1,7 @@
 # Plot validation and NN data after some cut on 2,3,4 variable
 
 # apply cut on 2nd input
-Cut1=-100000
+Cut1=1.5 
 
 
 from ROOT import gROOT,gPad,gStyle,TCanvas,TSpline3,TFile,TLine,TLatex,TAxis,TLegend,TPostScript
@@ -85,14 +85,14 @@ gPad.SetLogy(0)
 gPad.SetTopMargin(0.05)
 gPad.SetBottomMargin(0.1)
 gPad.SetLeftMargin(0.1)
-gPad.SetRightMargin(0.15)
+gPad.SetRightMargin(0.05)
 
 data1_in,data1_out=getData("data/valid1.data")
 data2_in,data2_out=getData("data/neuralnet.data")
 
-xmin=-2000-1 
-xmax=2000-1 
-bins=50
+xmin=-4000-1 
+xmax=4000-1 
+bins=100
 
 h1=TH1D("valid","valid", bins, xmin,xmax)
 h1.SetLineWidth(2)
@@ -112,11 +112,13 @@ h2.SetStats(0)
 h2.SetTitle("")
 
 # loop over all events
-for i in range(len(data1_in)):
+for i in xrange(len(data1_in)):
 
+          # original validation file
           inputs1=data1_in[i]
           output1=data1_out[i]
 
+          # predicted by NN 
           inputs2=data2_in[i]
           output2=data2_out[i]
 
@@ -128,15 +130,17 @@ for i in range(len(data1_in)):
           if (inputs2[1]>Cut1):
              if ( output2[1]>0): h2.Fill(  output2[0]  )
 
-h2.Draw("pe")
-h1.Draw("same histo")
+h1.Draw("histo")
+h2.Draw("pe same") 
 
-leg2=TLegend(0.5, 0.8, 0.87, 0.94);
+leg2=TLegend(0.6, 0.8, 0.85, 0.94);
 leg2.SetBorderSize(0);
 leg2.SetFillColor(10);
-leg2.SetTextSize(0.04);
+leg2.SetTextSize(0.035);
 leg2.AddEntry(h1,"Original","pl")
+leg2.AddEntry(h1,"M="+"{0:.2f}".format(h1.GetMean())+ " rms="+"{0:.2f}".format(h1.GetRMS()),"")
 leg2.AddEntry(h2,"Neural Net","pl")
+leg2.AddEntry(h2,"M="+"{0:.2f}".format(h2.GetMean())+ " rms="+"{0:.2f}".format(h2.GetRMS()),"")
 leg2.Draw("same");
 
 print "Cut on 2nd input=", Cut1
