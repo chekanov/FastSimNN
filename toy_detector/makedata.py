@@ -9,8 +9,13 @@ import sys,random
 from math import *
 
 myinput="data/train1.data"
+
 if (len(sys.argv) > 1):
    myinput = "data/"+sys.argv[1]
+   
+if ("train" in myinput):  random.seed(10)
+if ("val" in myinput):  random.seed(20)
+ 
 print "Output file name is =",myinput
 
 # total number of events with a random vector that need to be changed 
