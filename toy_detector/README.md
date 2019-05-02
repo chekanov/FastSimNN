@@ -15,6 +15,9 @@ make                            # compile NN training
 ./A_RUN                         # run  
 ```
 
+The you can compare validation with NN sample using "plotme.py"
+
+
 # History
 
  - Version 1.0 December 1, 2018: Initial version
