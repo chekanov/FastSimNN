@@ -8,9 +8,9 @@
 import sys,random
 from math import *
 
-myinput="train1.data"
+myinput="data/train1.data"
 if (len(sys.argv) > 1):
-   myinput = sys.argv[1]
+   myinput = "data/"+sys.argv[1]
 print "Output file name is =",myinput
 
 # total number of events with a random vector that need to be changed 
@@ -91,4 +91,6 @@ for nev in xrange(NrOfEvents):
 
          ff.write(str(VAL[0])+" "+str(P1[0])+" "+str(P2[0])+" "+str(P3[0])+"\n")
          ff.write(str(out1)+" "+str(exist)+"\n")
+
+print "Write",myinput
 

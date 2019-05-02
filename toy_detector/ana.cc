@@ -48,6 +48,8 @@ const double kPI   = TMath::Pi();
 const double k2PI  = 2*kPI;
 
 extern double RMS90(TH1*);
+int findCeil(int  arr[], int r, int l, int h);
+int myRand(int arr[], int freq[], int n);
 
 // main example
 int main(int argc, char **argv)
@@ -73,7 +75,7 @@ int main(int argc, char **argv)
 
 
 	// before doing anything, read train data and shuffle
-	const char* trainFile="./train1.data";
+	const char* trainFile="data/train1.data";
 	cout << "Read file: " << trainFile << endl;
 
 	std::vector<int> ints;
@@ -108,7 +110,10 @@ int main(int argc, char **argv)
 	cout << "calculate min and max for differences" << endl;
 
 	double cmin = 1e10;  double cmax = -1e10;
-	for (unsigned int nn=0; nn<dataTrain-> num_data; nn++) {
+
+        int totalEvents = dataTrain-> num_data;
+
+	for (unsigned int nn=0; nn<totalEvents; nn++) {
 		fann_type** output = dataTrain->output;
 		float v1=output[nn][0];
 		if (v1 < cmin) cmin = v1;
@@ -118,7 +123,6 @@ int main(int argc, char **argv)
 	}
 
 
-	int totalEvents = dataTrain-> num_data;
 
 
 	long before;
@@ -138,7 +142,7 @@ int main(int argc, char **argv)
 	const char* nn_name="nn_out/neural_final.net";
 
 
-	string outputfile="input.root";
+	string outputfile="data/input.root";
 	cout << "\n -> Output file is =" << outputfile << endl;
 	TFile * RootFile1 = new TFile(outputfile.c_str(), "RECREATE", "Histogram file");
 
@@ -179,6 +183,14 @@ int main(int argc, char **argv)
 
 	double del=(Xmax - Xmin) / maxSlice;
 	cout << "  Used step= " << del << endl;
+
+
+        // keep binning for resolution  
+        int  BinOverTrue[maxSlice-1];
+        for (int jjj=0; jjj<maxSlice-1; jjj++) {
+                             float d1=Xmin+jjj* del;
+                             BinOverTrue[jjj]=d1; 
+                        }
 
 
 
@@ -345,7 +357,10 @@ int main(int argc, char **argv)
 	if (rtype == "run") {
 
 
-		string outputfile="output.root";
+               ofstream myfile;
+               myfile.open ("data/neuralnet.data"); // output file 
+
+		string outputfile="data/output.root";
 		cout << "\n -> Output file is =" << outputfile << endl;
 		TFile * RootFile = new TFile(outputfile.c_str(), "RECREATE", "Histogram file");
 		TH1D * out1res= new TH1D("output_res", "output_res",maxSlice,Xmin,Xmax);
@@ -353,9 +368,14 @@ int main(int argc, char **argv)
 
 		cout << endl << "Testing network: open " << nn_name << endl;
 		struct fann *ann_new = fann_create_from_file(nn_name);
-		const char* testFile="valid1.data";
+		const char* testFile="data/valid1.data";
 		cout << "Read test: " << testFile << endl;
 		struct fann_train_data *data = fann_read_train_from_file( testFile );
+                fann_type** original_input = data->input;
+                // write header file
+                myfile << data->num_data << " " << data->num_input << " " << data->num_output << "\n";
+
+                // for NN, scale it
 		fann_scale_input_train_data(data, 0, 1.0);
 
 
@@ -363,22 +383,34 @@ int main(int argc, char **argv)
 		//fann_shuffle_train_data(data);
 
 		int totalEvents = data-> num_data;
-		fann_type** input = data->input;
-		fann_type** output = data->output;
+		//fann_type** input = data->input;
+		//fann_type** output = data->output;
 
 		for (int m=0; m<totalEvents; m++){
 
 			//fann_scale_input( ann_new, data->input[m] );
+
+                        int INSlice[maxSlice-1];
+
+                        // write original 
+                        for (int kk=0; kk<data->num_input; kk++) myfile <<  original_input[m][kk] << " "; 
+                        myfile << "" << endl;
+
 
 			fann_type * output1 = fann_run(ann_new, data->input[m]);
 			for (int jjj=0; jjj<maxSlice-1; jjj++) {
 				// cout << output1[jjj] << endl;
 				float d1=Xmin+jjj* del;
 				//float d2=d1+del;
-				out1res->Fill(d1+0.5*del,output1[jjj]*100000); // conver to int
+                                INSlice[jjj]=(int)( output1[jjj]*1000000 ); // convert to int 
+				out1res->Fill(d1+0.5*del,(double)INSlice[jjj]); //  
 			}
 
-			int jjj=maxSlice; // efficienct
+                        int BinSelected=myRand(BinOverTrue, INSlice, maxSlice-1); // select random value (bin) assuming frequencies
+
+                        //cout << "bin selected =" <<  BinSelected << endl;
+
+			int jjj=maxSlice; // efficiency 
 			out1eff->Fill(output1[jjj]);
 
 
@@ -409,6 +441,7 @@ int main(int argc, char **argv)
 		cout << "  efficiency mean=" << mean_2eff  << " true=" << mean_eff << endl;
 
 
+                myfile.close();
 		RootFile->Write();
 		RootFile->Print();
 		RootFile->Close();
