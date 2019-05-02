@@ -43,7 +43,7 @@ def dtransform(VAL, P1, P2, P3):
      return VAL_REC
 
 
-ff=open("train1.data","w")
+ff=open(myinput,"w")
 ff.write(str(NrOfEvents)+" "+str(4)+" "+str(2)+"\n")
 
 
@@ -85,7 +85,7 @@ for nev in xrange(NrOfEvents):
                               out1=VAL_REC[0]-VAL[0]
                               exist=1
 
-         if (nev%1000==0): 
+         if (nev%10000==0): 
              print "event=",nev," has ",len(VAL)," particles. After transform=",len(VAL_REC)  
 
 
