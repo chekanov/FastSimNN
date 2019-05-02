@@ -143,14 +143,12 @@ int main(int argc, char **argv)
 
 
         string outputfile="data/input.root";
-        if (rtype == "run") {
-                string outputfile="data/output.root";
-        }
+        if (rtype == "run") outputfile="data/output.root";
         cout << "\n -> Output file is =" << outputfile << endl;
         TFile * RootFile = new TFile(outputfile.c_str(), "RECREATE", "Histogram file");
 
-	TH1D * recOVtrue= new TH1D("rec-true", "rec-true",maxSlice,cmin,cmax);
-	TH1D * input1eff= new TH1D("input_eff", "input_eff",2,0,2);
+	TH1D * recOVtrue= new TH1D("rec-true", "rec-true as read from input file",maxSlice,cmin,cmax);
+	TH1D * input1eff= new TH1D("input_eff", "efficiency from input file",2,0,2);
 
 	for (unsigned int nn=0; nn<dataTrain-> num_data; nn++) {
 		fann_type** output = dataTrain->output;
@@ -179,8 +177,7 @@ int main(int argc, char **argv)
 	double mean_eff=input1eff->GetMean();
 	cout << "  efficiency mean=" << mean_eff << endl;
 
-
-	TH1D * input1res= new TH1D("input_res", "input_res",maxSlice,Xmin,Xmax);
+	TH1D * input1res= new TH1D("input_res", "rec-true after sliced resolution",maxSlice,Xmin,Xmax);
 
 	double del=(Xmax - Xmin) / maxSlice;
 	cout << "  Used step= " << del << endl;
@@ -219,7 +216,7 @@ int main(int argc, char **argv)
 				float d2=d1+del;
 				if (v1>d1  && v1<=d2) Slice[jjj]=1.0f;
 				else Slice[jjj]=0;
-                                if (v2<0) Slice[jjj]=0;
+                                if (v2==0) Slice[jjj]=0; // 0 if did not pass efficiency 
 			}
 
 
@@ -351,21 +348,18 @@ int main(int argc, char **argv)
 		RootFile->Close();
 		cout << "Writing ROOT file "+ outputfile << endl;
 		return 0;
-
-
 	}
-
 
 
 
 	if (rtype == "run") {
 
-
                 ofstream myfile;
                 myfile.open ("data/neuralnet.data"); // output file 
 
-		TH1D * out1res= new TH1D("output_res", "output_res",maxSlice,Xmin,Xmax);
-		TH1D * out1eff= new TH1D("output_eff", "output_eff",100,0,1.0);
+		TH1D * out1res= new TH1D("nn_res", "nn_res",maxSlice,Xmin,Xmax);
+		TH1D * out1eff= new TH1D("nn_eff", "nn_eff",100,0,1.0);
+                TH1D * out2res= new TH1D("predicted_res", "predicted_resolution",maxSlice,Xmin,Xmax);
 
 		cout << endl << "Testing network: open " << nn_name << endl;
 		struct fann *ann_new = fann_create_from_file(nn_name);
@@ -411,7 +405,8 @@ int main(int argc, char **argv)
 
                         float true_value=original_input[m][0];
                         int jjj=maxSlice; // efficiency
-                        out1eff->Fill(output1[jjj]);
+                        float efficiency=output1[jjj];
+                        out1eff->Fill( efficiency );
 
 
                         //cout << "efficiency =" <<  output1[jjj] << endl;
@@ -419,7 +414,7 @@ int main(int argc, char **argv)
                         float isExist=1;
                         // efficiency. Make randon (0-1) 
                         float r = ((double) rand() / (RAND_MAX)); 
-                        if (r<(1-output1[jjj]))  isExist=0;
+                        if (r<(1-efficiency))  isExist=0;
 
                        //cout << r << "  " << output1[jjj] << endl;
 
@@ -427,6 +422,7 @@ int main(int argc, char **argv)
                         if (isExist>0) {
                           int BinSelected=myRand(BinOverTrue, INSlice, maxSlice-1); // select random value (bin) assuming frequencies
                           reco_value=BinSelected;
+                          out2res->Fill( reco_value );
                         }
 
                         myfile <<  reco_value  << " " <<   isExist  << endl;

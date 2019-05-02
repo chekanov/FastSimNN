@@ -92,14 +92,16 @@ data2_in,data2_out=getData("data/neuralnet.data")
 
 xmin=-2000-1 
 xmax=2000-1 
-h1=TH1D("valid","valid", 100, xmin,xmax)
+bins=50
+
+h1=TH1D("valid","valid", bins, xmin,xmax)
 h1.SetLineWidth(2)
 h1.SetLineStyle(1)
 h1.SetLineColor(1);
 h1.SetStats(0)
 h1.SetTitle("")
 
-h2=TH1D("neuralnet","neuralnet", 100, xmin,xmax)
+h2=TH1D("neuralnet","neuralnet", bins, xmin,xmax)
 h2.SetMarkerColor(2)
 h2.SetMarkerSize(0.7)
 h2.SetMarkerStyle(21)
