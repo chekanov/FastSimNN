@@ -56,11 +56,11 @@ int main(int argc, char **argv)
 
 
 
-       // how many slices assume 200 slices
-        const int maxSlice=200;
+	// how many slices assume 200 slices
+	const int maxSlice=200;
 
 
-       cout << "\n\n start calculations with " << maxSlice << " slices" << endl; 
+	cout << "\n\n start calculations with " << maxSlice << " slices" << endl;
 
 	if (argc != 2) {
 		cerr << " Unexpected number of command-line arguments. \n Set: train or run"
@@ -138,51 +138,51 @@ int main(int argc, char **argv)
 	const char* nn_name="nn_out/neural_final.net";
 
 
-               string outputfile="input.root";
-                cout << "\n -> Output file is =" << outputfile << endl;
-                TFile * RootFile1 = new TFile(outputfile.c_str(), "RECREATE", "Histogram file");
+	string outputfile="input.root";
+	cout << "\n -> Output file is =" << outputfile << endl;
+	TFile * RootFile1 = new TFile(outputfile.c_str(), "RECREATE", "Histogram file");
 
 
 
-                TH1D * recOVtrue= new TH1D("rec-true", "rec-true",maxSlice,cmin,cmax);
-                TH1D * input1eff= new TH1D("input_eff", "input_eff",2,0,2);
+	TH1D * recOVtrue= new TH1D("rec-true", "rec-true",maxSlice,cmin,cmax);
+	TH1D * input1eff= new TH1D("input_eff", "input_eff",2,0,2);
 
-                for (unsigned int nn=0; nn<dataTrain-> num_data; nn++) {
-                fann_type** output = dataTrain->output;
-                float v1=output[nn][0];
-                float v2=output[nn][1];
-                 recOVtrue->Fill(v1); // fill rec-true  
-                 input1eff->Fill(v2); // fill efficiency
+	for (unsigned int nn=0; nn<dataTrain-> num_data; nn++) {
+		fann_type** output = dataTrain->output;
+		float v1=output[nn][0];
+		float v2=output[nn][1];
+		recOVtrue->Fill(v1); // fill rec-true
+		input1eff->Fill(v2); // fill efficiency
 
-                //cout <<  nn << " " << dataTrain->num_input << endl;
-                 }
-
-
-                cout << "#####  Rec-true distribution:" << endl;
-                double mean=recOVtrue->GetMean();
-                double rms=recOVtrue->GetRMS();
-                double rms90=RMS90( recOVtrue );
-                cout << "  mean=" << mean << endl; 
-                cout << "  RMS=" << rms << endl;
-                cout << "  RMS90=" << rms90 << endl;
-                cout << "  min and max " << cmin << " - " << cmax << endl;
-                // redefine ranges based on RMS
-                double Xmin=mean-3*rms;
-                double Xmax=mean+3*rms;
-                cout << "  Used min and max " << Xmin << " " << Xmax << endl;
-
-               double mean_eff=input1eff->GetMean();
-               cout << "  efficiency mean=" << mean_eff << endl;
+		//cout <<  nn << " " << dataTrain->num_input << endl;
+	}
 
 
-                TH1D * input1res= new TH1D("input_res", "input_res",maxSlice,Xmin,Xmax);
+	cout << "#####  Rec-true distribution:" << endl;
+	double mean=recOVtrue->GetMean();
+	double rms=recOVtrue->GetRMS();
+	double rms90=RMS90( recOVtrue );
+	cout << "  mean=" << mean << endl;
+	cout << "  RMS=" << rms << endl;
+	cout << "  RMS90=" << rms90 << endl;
+	cout << "  min and max " << cmin << " - " << cmax << endl;
+	// redefine ranges based on RMS
+	double Xmin=mean-3*rms;
+	double Xmax=mean+3*rms;
+	cout << "  Used min and max " << Xmin << " " << Xmax << endl;
 
-                double del=(Xmax - Xmin) / maxSlice;
-                cout << "  Used step= " << del << endl;
+	double mean_eff=input1eff->GetMean();
+	cout << "  efficiency mean=" << mean_eff << endl;
 
- 
 
-            if (rtype == "train") {
+	TH1D * input1res= new TH1D("input_res", "input_res",maxSlice,Xmin,Xmax);
+
+	double del=(Xmax - Xmin) / maxSlice;
+	cout << "  Used step= " << del << endl;
+
+
+
+	if (rtype == "train") {
 
 		// rebuild train data
 		// empty data
@@ -195,7 +195,7 @@ int main(int argc, char **argv)
 
 			for (int kk=0; kk<num_input; kk++)  dataset1->input[nn][kk] =input[nn][kk];
 
-                        //float in=input[nn][0]; // 1st variable is active input 
+			//float in=input[nn][0]; // 1st variable is active input
 			float Slice[maxSlice-1];
 			float v1=output[nn][0]; // this one is difference rec-true
 			float v2=output[nn][1];
@@ -215,7 +215,7 @@ int main(int argc, char **argv)
 			}
 
 			for (int kk=0; kk<maxSlice-1; kk++)  dataset1->output[nn][kk] =Slice[kk];
-                        // efficiency value is unchanged
+			// efficiency value is unchanged
 			dataset1->output[nn][num_output-1] =v2;
 
 		}
@@ -228,9 +228,9 @@ int main(int argc, char **argv)
 		struct fann *ann = fann_create_standard(num_layers, num_input, num_neurons_hidden_1, num_output);
 
 
-                 // scale input. Output does not need to be scaled
-                fann_scale_input_train_data(dataset1, 0, 1.0);
-               //   fann_set_scaling_params(dataset1, ann, -1.0, 1.0, -1.0, 1.0);
+		// scale input. Output does not need to be scaled
+		fann_scale_input_train_data(dataset1, 0, 1.0);
+		//   fann_set_scaling_params(dataset1, ann, -1.0, 1.0, -1.0, 1.0);
 
 
 
@@ -330,11 +330,11 @@ int main(int argc, char **argv)
 		fann_destroy(ann);
 
 
-               RootFile1->Write();
-                RootFile1->Print();
-                RootFile1->Close();
-                cout << "Writing ROOT file "+ outputfile << endl;
-                return 0;
+		RootFile1->Write();
+		RootFile1->Print();
+		RootFile1->Close();
+		cout << "Writing ROOT file "+ outputfile << endl;
+		return 0;
 
 
 	}
@@ -349,14 +349,14 @@ int main(int argc, char **argv)
 		cout << "\n -> Output file is =" << outputfile << endl;
 		TFile * RootFile = new TFile(outputfile.c_str(), "RECREATE", "Histogram file");
 		TH1D * out1res= new TH1D("output_res", "output_res",maxSlice,Xmin,Xmax);
-                TH1D * out1eff= new TH1D("output_eff", "output_eff",2,0,2);
+		TH1D * out1eff= new TH1D("output_eff", "output_eff",2,0,2);
 
 		cout << endl << "Testing network: open " << nn_name << endl;
 		struct fann *ann_new = fann_create_from_file(nn_name);
 		const char* testFile="valid1.data";
 		cout << "Read test: " << testFile << endl;
 		struct fann_train_data *data = fann_read_train_from_file( testFile );
-                fann_scale_input_train_data(data, 0, 1.0);
+		fann_scale_input_train_data(data, 0, 1.0);
 
 
 		//cout << "..randomize data.. " << endl;
@@ -368,18 +368,18 @@ int main(int argc, char **argv)
 
 		for (int m=0; m<totalEvents; m++){
 
-                        //fann_scale_input( ann_new, data->input[m] );
+			//fann_scale_input( ann_new, data->input[m] );
 
 			fann_type * output1 = fann_run(ann_new, data->input[m]);
 			for (int jjj=0; jjj<maxSlice-1; jjj++) {
 				// cout << output1[jjj] << endl;
 				float d1=Xmin+jjj* del;
 				//float d2=d1+del;
-				out1res->Fill(d1+0.5*del,output1[jjj]*100000); // conver to int 
+				out1res->Fill(d1+0.5*del,output1[jjj]*100000); // conver to int
 			}
 
-                        int jjj=maxSlice; // efficienct
-                        out1eff->Fill(output1[jjj]);
+			int jjj=maxSlice; // efficienct
+			out1eff->Fill(output1[jjj]);
 
 
 			/*
@@ -398,15 +398,15 @@ int main(int argc, char **argv)
 
 
 
-                cout << "\n#### Predicted Rec-true distribution:" << endl;
-                double mean_1=out1res->GetMean();
-                double rms_1=out1res->GetRMS();
-                double rms90_1=RMS90( out1res );
-                cout << "  mean=" << mean_1 << " true=" << mean << endl;
-                cout << "  RMS=" << rms_1 << " true=" << rms << endl;
-                cout << "  RMS90=" << rms90_1 << " true = " << rms90 << endl;
-                double mean_2eff=out1eff->GetMean();
-                cout << "  efficiency mean=" << mean_2eff  << " true=" << mean_eff << endl;
+		cout << "\n#### Predicted Rec-true distribution:" << endl;
+		double mean_1=out1res->GetMean();
+		double rms_1=out1res->GetRMS();
+		double rms90_1=RMS90( out1res );
+		cout << "  mean=" << mean_1 << " true=" << mean << endl;
+		cout << "  RMS=" << rms_1 << " true=" << rms << endl;
+		cout << "  RMS90=" << rms90_1 << " true = " << rms90 << endl;
+		double mean_2eff=out1eff->GetMean();
+		cout << "  efficiency mean=" << mean_2eff  << " true=" << mean_eff << endl;
 
 
 		RootFile->Write();
