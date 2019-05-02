@@ -1,7 +1,7 @@
 # Plot validation and NN data after some cut on 2,3,4 variable
 
 # apply cut on 2nd input
-Cut1=-1
+Cut1=-100000
 
 
 from ROOT import gROOT,gPad,gStyle,TCanvas,TSpline3,TFile,TLine,TLatex,TAxis,TLegend,TPostScript
@@ -90,8 +90,8 @@ gPad.SetRightMargin(0.15)
 data1_in,data1_out=getData("data/valid1.data")
 data2_in,data2_out=getData("data/neuralnet.data")
 
-xmin=-2000
-xmax=2000
+xmin=-2000-1 
+xmax=2000-1 
 h1=TH1D("valid","valid", 100, xmin,xmax)
 h1.SetLineWidth(2)
 h1.SetLineStyle(1)
@@ -109,10 +109,9 @@ h2.SetLineColor(1);
 h2.SetStats(0)
 h2.SetTitle("")
 
+# loop over all events
 for i in range(len(data1_in)):
-          #print data_in[i], data_out[i]
 
-          # apply some cuts:
           inputs1=data1_in[i]
           output1=data1_out[i]
 
@@ -120,17 +119,27 @@ for i in range(len(data1_in)):
           output2=data2_out[i]
 
           # set a cut on one variable
-          if (inputs1[1]>Cut1 and inputs2[1]>Cut1): 
-             # fill histo
-             if ( inputs1[1]>0): h1.Fill(  output1[0]  )
-             if ( inputs2[1]>0): h2.Fill(  output2[0]  )
+          if (inputs1[1]>Cut1): 
+             if ( output1[1]>0): h1.Fill(  output1[0]  )
 
-h1.Draw("histo")
-h2.Draw("same pe")
+          # set a cut on one variable
+          if (inputs2[1]>Cut1):
+             if ( output2[1]>0): h2.Fill(  output2[0]  )
+
+h2.Draw("pe")
+h1.Draw("same histo")
+
+leg2=TLegend(0.5, 0.8, 0.87, 0.94);
+leg2.SetBorderSize(0);
+leg2.SetFillColor(10);
+leg2.SetTextSize(0.04);
+leg2.AddEntry(h1,"Original","pl")
+leg2.AddEntry(h2,"Neural Net","pl")
+leg2.Draw("same");
 
 print "Cut on 2nd input=", Cut1
-print "Tree:  mean=",h1.GetMean()," RMS=",h1.GetRMS()
-print "NN  : mean=",h2.GetMean()," RMS=",h2.GetRMS()
+print "True:  mean=",h1.GetMean()," RMS=",h1.GetRMS()," entries=",h1.GetEntries() 
+print "NN  :  mean=",h2.GetMean()," RMS=",h2.GetRMS()," entries=",h2.GetEntries()
 
 
 print epsfig

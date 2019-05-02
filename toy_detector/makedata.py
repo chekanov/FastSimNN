@@ -5,11 +5,14 @@
 # The transformation includes: loses, shifting the mean, and applying some smearing using a Gaussian
 # S.Chekanov (ANL)
 
+from ROOT import TH1D
 import sys,random
 from math import *
 
 myinput="data/train1.data"
 
+h1=TH1D("REC-TRU","REC-TRU",500,-3000,3000);
+ 
 if (len(sys.argv) > 1):
    myinput = "data/"+sys.argv[1]
    
@@ -37,13 +40,13 @@ def dtransform(VAL, P1, P2, P3):
             if (Efficiency<0.1): Efficiency=0.1
             if (random.random()>Efficiency):     continue;   # skip this number
 
-            Sigma= 0.11+(10*P1[i] - 0.1*P2[i])                # or make any function from P1, P2, P3
+            Sigma= (35+10*P1[i]-P2[i])*sqrt(VAL[i]);   # or make any function from P1, P2, P3
             if (Sigma<0.1): Sigma=0.1
 
             Response = 1.0+ (-0.1*P1[i]-0.1*P2[i]+0.1*P3[i]) # or make any function from P1, P2, P3 
             if (Response<0.1): Response=0.1
 
-            VAL_REC.append(random.gauss(VAL[i]*Response, Sigma))
+            VAL_REC.append( random.gauss(VAL[i]*Response, Sigma) )
            
      return VAL_REC
 
@@ -99,8 +102,10 @@ for nev in xrange(NrOfEvents):
          s3="%.5f" % P2[0] 
          s4="%.5f" % P3[0] 
          s5="%.5f" % out1 
+         h1.Fill(out1)
          ff.write(s1+" "+s2+" "+s3+" "+s4+"\n")
          ff.write(s5+" "+str(exist)+"\n")
 
 print "Write",myinput
+print "REC-TRU mean=",h1.GetMean()," RMS=",h1.GetRMS()
 

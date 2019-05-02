@@ -142,11 +142,12 @@ int main(int argc, char **argv)
 	const char* nn_name="nn_out/neural_final.net";
 
 
-	string outputfile="data/input.root";
-	cout << "\n -> Output file is =" << outputfile << endl;
-	TFile * RootFile1 = new TFile(outputfile.c_str(), "RECREATE", "Histogram file");
-
-
+        string outputfile="data/input.root";
+        if (rtype == "run") {
+                string outputfile="data/output.root";
+        }
+        cout << "\n -> Output file is =" << outputfile << endl;
+        TFile * RootFile = new TFile(outputfile.c_str(), "RECREATE", "Histogram file");
 
 	TH1D * recOVtrue= new TH1D("rec-true", "rec-true",maxSlice,cmin,cmax);
 	TH1D * input1eff= new TH1D("input_eff", "input_eff",2,0,2);
@@ -155,7 +156,7 @@ int main(int argc, char **argv)
 		fann_type** output = dataTrain->output;
 		float v1=output[nn][0];
 		float v2=output[nn][1];
-		recOVtrue->Fill(v1); // fill rec-true
+		if (v2>0) recOVtrue->Fill(v1); // fill rec-true
 		input1eff->Fill(v2); // fill efficiency
 
 		//cout <<  nn << " " << dataTrain->num_input << endl;
@@ -218,6 +219,7 @@ int main(int argc, char **argv)
 				float d2=d1+del;
 				if (v1>d1  && v1<=d2) Slice[jjj]=1.0f;
 				else Slice[jjj]=0;
+                                if (v2<0) Slice[jjj]=0;
 			}
 
 
@@ -344,9 +346,9 @@ int main(int argc, char **argv)
 		fann_destroy(ann);
 
 
-		RootFile1->Write();
-		RootFile1->Print();
-		RootFile1->Close();
+		RootFile->Write();
+		RootFile->Print();
+		RootFile->Close();
 		cout << "Writing ROOT file "+ outputfile << endl;
 		return 0;
 
@@ -359,14 +361,11 @@ int main(int argc, char **argv)
 	if (rtype == "run") {
 
 
-               ofstream myfile;
-               myfile.open ("data/neuralnet.data"); // output file 
+                ofstream myfile;
+                myfile.open ("data/neuralnet.data"); // output file 
 
-		string outputfile="data/output.root";
-		cout << "\n -> Output file is =" << outputfile << endl;
-		TFile * RootFile = new TFile(outputfile.c_str(), "RECREATE", "Histogram file");
 		TH1D * out1res= new TH1D("output_res", "output_res",maxSlice,Xmin,Xmax);
-		TH1D * out1eff= new TH1D("output_eff", "output_eff",2,0,2);
+		TH1D * out1eff= new TH1D("output_eff", "output_eff",100,0,1.0);
 
 		cout << endl << "Testing network: open " << nn_name << endl;
 		struct fann *ann_new = fann_create_from_file(nn_name);
@@ -411,12 +410,9 @@ int main(int argc, char **argv)
 			}
 
                         float true_value=original_input[m][0];
-                        int BinSelected=myRand(BinOverTrue, INSlice, maxSlice-1); // select random value (bin) assuming frequencies
+                        int jjj=maxSlice; // efficiency
+                        out1eff->Fill(output1[jjj]);
 
-                        float reco_value=BinSelected;
-
-			int jjj=maxSlice; // efficiency 
-			out1eff->Fill(output1[jjj]);
 
                         //cout << "efficiency =" <<  output1[jjj] << endl;
 
@@ -424,7 +420,14 @@ int main(int argc, char **argv)
                         // efficiency. Make randon (0-1) 
                         float r = ((double) rand() / (RAND_MAX)); 
                         if (r<(1-output1[jjj]))  isExist=0;
-                        //cout << r << "  " << output1[jjj] << endl;
+
+                       //cout << r << "  " << output1[jjj] << endl;
+
+                        float reco_value=0;
+                        if (isExist>0) {
+                          int BinSelected=myRand(BinOverTrue, INSlice, maxSlice-1); // select random value (bin) assuming frequencies
+                          reco_value=BinSelected;
+                        }
 
                         myfile <<  reco_value  << " " <<   isExist  << endl;
 
