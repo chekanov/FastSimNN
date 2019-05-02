@@ -5,7 +5,7 @@
 # The transformation includes: loses, shifting the mean, and applying some smearing using a Gaussian
 # S.Chekanov (ANL)
 
-import random
+import sys,random
 from math import *
 
 myinput="train1.data"
@@ -28,10 +28,16 @@ def dtransform(VAL, P1, P2, P3):
      """Apply some smearing and shift true value v"""
      VAL_REC=[]
      for i in range(len(VAL)):
-            Efficiency=1-0.1*(P1[i]+P2[i]+P3[i])             # make any function from P1, P2, P3 and make sure 0<Efficiency<1
+            Efficiency=1-0.1*(P1[i]+P2[i]-P3[i])             # make any function from P1, P2, P3 and make sure 0<Efficiency<1
+            if (Efficiency<0.1): Efficiency=0.1
             if (random.random()>Efficiency):     continue;   # skip this number
-            Sigma= 0.1*(P1[i]+P2[i]+P3[i])                   # or make any function from P1, P2, P3
-            Response = 1.0+ (-0.1*P1[i]-0.1*P2[i]-0.1*P3[i]) # or make any function from P1, P2, P3 
+
+            Sigma= 0.5*(P1[i]+P2[i]-P3[i])                   # or make any function from P1, P2, P3
+            if (Sigma<0.1): Sigma=0.1
+
+            Response = 1.0+ (-0.1*P1[i]-0.1*P2[i]+0.1*P3[i]) # or make any function from P1, P2, P3 
+            if (Response<0.1): Response=0.2
+
             VAL_REC.append(random.gauss(VAL[i]*Response, Sigma))
            
      return VAL_REC

@@ -9,10 +9,10 @@ Make sure $ROOTSYS and $FANN are set (point to ROOT and FANN packages).
 The program is designed and compiled to run on the ANL ATLAS cluster.
 
 ```
-python2 makedata.py train1.data
-python2 makedata.py valid1.data
-make
-./A_RUN
+python2 makedata.py train1.data # training sample 
+python2 makedata.py valid1.data # validation sample 
+make                            # compile NN training 
+./A_RUN                         # run  
 ```
 
 # History
