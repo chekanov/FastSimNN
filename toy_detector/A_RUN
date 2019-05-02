@@ -1,0 +1,11 @@
+#!/bin/bash
+# S.Chekanov (ANL)
+
+source ./setup.sh
+
+# train
+./ana train 
+
+sleep 1
+#test 
+./ana run
