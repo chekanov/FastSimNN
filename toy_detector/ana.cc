@@ -407,21 +407,7 @@ int main(int argc, char **argv)
                           //cout << BinSelected  << endl;
                           out2res->Fill( reco_value );
                         }
-
                         myfile <<  reco_value  << " " <<   isExist  << endl;
-
-
-			/*
-			           float Slice[maxSlice-1];
-			           float v1=output[nn][0];
-			           float v2=output[nn][1];
-			           for (int jjj=0; jjj<maxSlice-1; jjj++) {
-			               float d1=cmin+jjj* del;
-			               float d2=d1+del;
-			               if (v1>d1  && v1<=d2) Slice[jjj]=1.0f;
-			               else Slice[jjj]=0;
-			            }
-			*/
 
 		}
 
