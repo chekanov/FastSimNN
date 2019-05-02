@@ -4,7 +4,7 @@
 source ./setup.sh
 
 # train
-#./ana train 
+./ana train 
 
 sleep 1
 #test 

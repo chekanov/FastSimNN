@@ -189,11 +189,12 @@ int main(int argc, char **argv)
         int  BinOverTrue[maxSlice-1];
         for (int jjj=0; jjj<maxSlice-1; jjj++) {
                              float d1=Xmin+jjj* del;
-                             BinOverTrue[jjj]=d1; 
+                             BinOverTrue[jjj]=(int)d1; 
                         }
 
-
-
+// ***********************************************************************
+// ---------------------- this part for training -------------------------
+// ***********************************************************************
 	if (rtype == "train") {
 
 		// rebuild train data
@@ -210,7 +211,7 @@ int main(int argc, char **argv)
 			//float in=input[nn][0]; // 1st variable is active input
 			float Slice[maxSlice-1];
 			float v1=output[nn][0]; // this one is difference rec-true
-			float v2=output[nn][1];
+			float v2=output[nn][1]; /// this is efficiency 0 or 1 
 
 			for (int jjj=0; jjj<maxSlice-1; jjj++) {
 				float d1=Xmin+jjj* del;
@@ -223,9 +224,10 @@ int main(int argc, char **argv)
 			// check the histogram
 			for (int jjj=0; jjj<maxSlice-1; jjj++) {
 				float d1=Xmin+jjj* del;
-				input1res->Fill(d1+del,Slice[jjj]);
+				input1res->Fill(d1+0.5*del,Slice[jjj]);
 			}
 
+                        // prepare new output for NN (resolution)
 			for (int kk=0; kk<maxSlice-1; kk++)  dataset1->output[nn][kk] =Slice[kk];
 			// efficiency value is unchanged
 			dataset1->output[nn][num_output-1] =v2;
@@ -371,7 +373,6 @@ int main(int argc, char **argv)
 		const char* testFile="data/valid1.data";
 		cout << "Read test: " << testFile << endl;
 		struct fann_train_data *data = fann_read_train_from_file( testFile );
-                fann_type** original_input = data->input;
                 // write header file
                 myfile << data->num_data << " " << data->num_input << " " << data->num_output << "\n";
 
@@ -386,6 +387,10 @@ int main(int argc, char **argv)
 		//fann_type** input = data->input;
 		//fann_type** output = data->output;
 
+                // read data again (original, no scaling)
+                struct fann_train_data *original = fann_read_train_from_file( testFile );
+                fann_type** original_input = original->input;
+
 		for (int m=0; m<totalEvents; m++){
 
 			//fann_scale_input( ann_new, data->input[m] );
@@ -396,7 +401,6 @@ int main(int argc, char **argv)
                         for (int kk=0; kk<data->num_input; kk++) myfile <<  original_input[m][kk] << " "; 
                         myfile << "" << endl;
 
-
 			fann_type * output1 = fann_run(ann_new, data->input[m]);
 			for (int jjj=0; jjj<maxSlice-1; jjj++) {
 				// cout << output1[jjj] << endl;
@@ -406,12 +410,23 @@ int main(int argc, char **argv)
 				out1res->Fill(d1+0.5*del,(double)INSlice[jjj]); //  
 			}
 
+                        float true_value=original_input[m][0];
                         int BinSelected=myRand(BinOverTrue, INSlice, maxSlice-1); // select random value (bin) assuming frequencies
 
-                        //cout << "bin selected =" <<  BinSelected << endl;
+                        float reco_value=BinSelected;
 
 			int jjj=maxSlice; // efficiency 
 			out1eff->Fill(output1[jjj]);
+
+                        //cout << "efficiency =" <<  output1[jjj] << endl;
+
+                        float isExist=1;
+                        // efficiency. Make randon (0-1) 
+                        float r = ((double) rand() / (RAND_MAX)); 
+                        if (r<(1-output1[jjj]))  isExist=0;
+                        //cout << r << "  " << output1[jjj] << endl;
+
+                        myfile <<  reco_value  << " " <<   isExist  << endl;
 
 
 			/*

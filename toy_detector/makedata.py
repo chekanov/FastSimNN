@@ -89,8 +89,13 @@ for nev in xrange(NrOfEvents):
              print "event=",nev," has ",len(VAL)," particles. After transform=",len(VAL_REC)  
 
 
-         ff.write(str(VAL[0])+" "+str(P1[0])+" "+str(P2[0])+" "+str(P3[0])+"\n")
-         ff.write(str(out1)+" "+str(exist)+"\n")
+         s1="%.5f" % VAL[0]
+         s2="%.5f" % P1[0] 
+         s3="%.5f" % P2[0] 
+         s4="%.5f" % P3[0] 
+         s5="%.5f" % out1 
+         ff.write(s1+" "+s2+" "+s3+" "+s4+"\n")
+         ff.write(s5+" "+str(exist)+"\n")
 
 print "Write",myinput
 
