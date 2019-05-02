@@ -1,7 +1,14 @@
 # Plot validation and NN data after some cut on 2,3,4 variable
 
 # apply cut on 2nd input
-Cut1=1.5 
+# this is a cut on 2nd input variable which changes betwenn -pi and pi
+# The spread of 1st variable significantly depends on 2nd variable
+Cut1=1.5
+
+# apply cut on 3rd input
+# this is a cut on 2nd input variable which changes betwenn -pi and pi
+# The spread of 1st variable significantly depends on 2nd variable
+Cut2=0
 
 
 from ROOT import gROOT,gPad,gStyle,TCanvas,TSpline3,TFile,TLine,TLatex,TAxis,TLegend,TPostScript
@@ -131,6 +138,15 @@ for i in xrange(len(data1_in)):
              if ( output2[1]>0): h2.Fill(  output2[0]  )
 
 h1.Draw("histo")
+ax=h1.GetXaxis(); ax.SetTitleOffset(0.8)
+ax.SetTitle( "rec-true" );
+ay=h1.GetYaxis(); ay.SetTitleOffset(0.8)
+ay.SetTitle( "events" );
+ax.SetTitleOffset(1.1); ay.SetTitleOffset(1.4)
+ax.Draw("same")
+ay.Draw("same")
+
+
 h2.Draw("pe same") 
 
 leg2=TLegend(0.6, 0.8, 0.85, 0.94);

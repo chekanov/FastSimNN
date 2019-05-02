@@ -3,8 +3,8 @@
 
 source ./setup.sh
 
-#python2 makedata.py train1.data # training sample
-#python2 makedata.py valid1.data # validation sample
+python2 makedata.py train1.data # training sample
+python2 makedata.py valid1.data # validation sample
 
 # train
 ./ana train 

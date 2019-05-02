@@ -40,7 +40,7 @@ def dtransform(VAL, P1, P2, P3):
             if (Efficiency<0.1): Efficiency=0.1
             if (random.random()>Efficiency):     continue;   # skip this number
 
-            Sigma= (35+10*P1[i]-P2[i])*sqrt(VAL[i]);   # or make any function from P1, P2, P3
+            Sigma= (35+10*P1[i]-5*abs(P2[i]))*sqrt(VAL[i]);   # or make any function from P1, P2, P3
             if (Sigma<0.1): Sigma=0.1
 
             Response = 1.0+ (-0.1*P1[i]-0.1*P2[i]+0.1*P3[i]) # or make any function from P1, P2, P3 
