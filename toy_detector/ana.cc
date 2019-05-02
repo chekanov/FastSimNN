@@ -59,7 +59,7 @@ int main(int argc, char **argv)
 
 
 	// how many slices assume 200 slices
-	const int maxSlice=200;
+	const int maxSlice=100;
 
 
 	cout << "\n\n start calculations with " << maxSlice << " slices" << endl;
@@ -136,7 +136,7 @@ int main(int argc, char **argv)
 	const unsigned int num_neurons_hidden_2=(int)(inNodes/4.0);
 
 	const double desired_error = (const float) 0.005;
-	const unsigned int max_epochs = 20;
+	const unsigned int max_epochs = 40;
 	const unsigned int epochs_between_reports = 10;
 	// NN name
 	const char* nn_name="nn_out/neural_final.net";

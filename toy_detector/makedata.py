@@ -37,11 +37,11 @@ def dtransform(VAL, P1, P2, P3):
             if (Efficiency<0.1): Efficiency=0.1
             if (random.random()>Efficiency):     continue;   # skip this number
 
-            Sigma= 0.5*(P1[i]+P2[i]-P3[i])                   # or make any function from P1, P2, P3
+            Sigma= 0.11+(10*P1[i] - 0.1*P2[i])                # or make any function from P1, P2, P3
             if (Sigma<0.1): Sigma=0.1
 
             Response = 1.0+ (-0.1*P1[i]-0.1*P2[i]+0.1*P3[i]) # or make any function from P1, P2, P3 
-            if (Response<0.1): Response=0.2
+            if (Response<0.1): Response=0.1
 
             VAL_REC.append(random.gauss(VAL[i]*Response, Sigma))
            
@@ -90,7 +90,7 @@ for nev in xrange(NrOfEvents):
                               out1=VAL_REC[0]-VAL[0]
                               exist=1
 
-         if (nev%10000==0): 
+         if (nev%50000==0): 
              print "event=",nev," has ",len(VAL)," particles. After transform=",len(VAL_REC)  
 
 
