@@ -2,6 +2,11 @@
 
 This is an example that creates fake data and perform training and validation.
 Make sure $ROOTSYS and $FANN are set (point to ROOT and FANN packages).
+For the ANL cluster, setup this example as:
+
+```
+source ./setup.sh
+```
 
 # How to create input data 
 
