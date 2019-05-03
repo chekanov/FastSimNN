@@ -48,6 +48,10 @@ using "plotme.py" script ("python plotme.py"). It will make the "resolution" plo
 You can set cuts "Cut1" on the 2nd value of the input, to see how the predicted value
 can change the resolution.
 
+Another script is "plot_nn.py". It plots resolution histograms directly from ROOT files
+created from ana.cc. It plots the original reco-true, NN neuron response  and frequencies from the NN response.
+
+
 # History
 
  - Version 1.0 May 2, 2019: First version

@@ -57,8 +57,11 @@ int main(int argc, char **argv)
 
 	// how many slices assume 200 slices
 	const int maxSlice=100;
-	cout << "\n\n start calculations with " << maxSlice << " slices" << endl;
+	cout << "\n\nStart calculations with " << maxSlice << " slices" << endl;
 
+        double nnToFreq=1000000;
+        cout << "NN to freq. conversion " << nnToFreq << " slices" << endl;
+ 
 	if (argc != 2) {
 		cerr << " Unexpected number of command-line arguments. \n Set: train or run"
 		<< " Program stopped! " << endl;
@@ -381,7 +384,7 @@ int main(int argc, char **argv)
 				// cout << output1[jjj] << endl;
 				float d1=Xmin+jjj* del;
 				//float d2=d1+del;
-                                INSlice[jjj]=(int)( output1[jjj]*100000 ); // convert to int 
+                                INSlice[jjj]=(int)( output1[jjj]*nnToFreq ); // convert to int 
 				out1res->Fill(d1+0.5*del,(double)INSlice[jjj]); //  
 			}
 
