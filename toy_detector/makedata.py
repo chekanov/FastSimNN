@@ -5,13 +5,13 @@
 # The transformation includes: loses, shifting the mean, and applying some smearing using a Gaussian
 # S.Chekanov (ANL)
 
-from ROOT import TH1D
+#from ROOT import TH1D
 import sys,random
 from math import *
 
 myinput="data/train1.data"
 
-h1=TH1D("REC-TRU","REC-TRU",500,-3000,3000);
+# h1=TH1D("REC-TRU","REC-TRU",500,-3000,3000);
  
 if (len(sys.argv) > 1):
    myinput = "data/"+sys.argv[1]
@@ -22,7 +22,7 @@ if ("val" in myinput):  random.seed(20)
 print "Output file name is =",myinput
 
 # total number of events with a random vector that need to be changed 
-NrOfEvents=500000
+NrOfEvents=1000000
 print "Number of objects=",NrOfEvents
 
 
@@ -102,10 +102,10 @@ for nev in xrange(NrOfEvents):
          s3="%.5f" % P2[0] 
          s4="%.5f" % P3[0] 
          s5="%.5f" % out1 
-         h1.Fill(out1)
+         # h1.Fill(out1)
          ff.write(s1+" "+s2+" "+s3+" "+s4+"\n")
          ff.write(s5+" "+str(exist)+"\n")
 
 print "Write",myinput
-print "REC-TRU mean=",h1.GetMean()," RMS=",h1.GetRMS()
+#print "REC-TRU mean=",h1.GetMean()," RMS=",h1.GetRMS()
 

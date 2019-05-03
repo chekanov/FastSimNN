@@ -3,12 +3,12 @@
 # apply cut on 2nd input
 # this is a cut on 2nd input variable which changes betwenn -pi and pi
 # The spread of 1st variable significantly depends on 2nd variable
-Cut1=1.5
+Cut1=1 
 
 # apply cut on 3rd input
 # this is a cut on 2nd input variable which changes betwenn -pi and pi
 # The spread of 1st variable significantly depends on 2nd variable
-Cut2=0
+Cut2=-9999
 
 
 from ROOT import gROOT,gPad,gStyle,TCanvas,TSpline3,TFile,TLine,TLatex,TAxis,TLegend,TPostScript
@@ -130,11 +130,11 @@ for i in xrange(len(data1_in)):
           output2=data2_out[i]
 
           # set a cut on one variable
-          if (inputs1[1]>Cut1): 
+          if (inputs1[1]>Cut1 and inputs1[2]>Cut2): 
              if ( output1[1]>0): h1.Fill(  output1[0]  )
 
           # set a cut on one variable
-          if (inputs2[1]>Cut1):
+          if (inputs2[1]>Cut1 and inputs2[2]>Cut2):
              if ( output2[1]>0): h2.Fill(  output2[0]  )
 
 h1.Draw("histo")
