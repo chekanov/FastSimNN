@@ -3,7 +3,7 @@
 # apply cut on 2nd input
 # this is a cut on 2nd input variable which changes betwenn -pi and pi
 # The spread of 1st variable significantly depends on 2nd variable
-Cut1=-9999
+Cut1=0
 
 # apply cut on 3rd input
 # this is a cut on 2nd input variable which changes betwenn -pi and pi
@@ -93,7 +93,7 @@ gPad.SetBottomMargin(0.1)
 gPad.SetLeftMargin(0.1)
 gPad.SetRightMargin(0.05)
 
-data1_in,data1_out=getData("data/valid1.data")
+data1_in,data1_out=getData("data/test1.data")
 data2_in,data2_out=getData("data/neuralnet.data")
 
 xmin=-4000-1 

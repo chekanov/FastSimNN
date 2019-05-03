@@ -48,7 +48,6 @@ void print_traindata(fann_train_data * data, int row);
 int main(int argc, char **argv)
 {
 
-
 	const bool debug=false;
 
 	// how many slices assume 200 slices
@@ -102,22 +101,20 @@ int main(int argc, char **argv)
 	int  numInput=dataTrain->num_input;
 
 	// min and max for outputs
-	for (int nn=0; nn<totalEvents; nn++) {
+	for (int ev=0; ev<totalEvents; ev++) {
 		fann_type** output = dataTrain->output;
-		float v1=output[nn][0];
+		float v1=output[ev][0];
 		if (v1 < cmin) cmin = v1;
 		if (v1 > cmax) cmax = v1;
-		//cout << v1 << endl;
-		//cout <<  nn << " " << dataTrain->num_input << endl;
 	}
 
 	// min and max values of inputs to put to the grid
 	double cminIN[numInput], cmaxIN[numInput];
-for (int jjj=0; jjj<numInput; jjj++) {cminIN[jjj]=1e10; cmaxIN[jjj]= -1e10;};
-	for (int nn=0; nn<totalEvents; nn++) {
+        for (int jjj=0; jjj<numInput; jjj++) {cminIN[jjj]=1e10; cmaxIN[jjj]= -1e10;};
+	for (int ev=0; ev<totalEvents; ev++) {
 		fann_type** input = dataTrain->input;
 		for (int jjj=0; jjj<numInput; jjj++) {
-			float v1=input[nn][jjj];
+			float v1=input[ev][jjj];
 			if (v1 < cminIN[jjj]) cminIN[jjj] = v1;
 			if (v1 > cmaxIN[jjj]) cmaxIN[jjj] = v1;
 		}
@@ -130,7 +127,7 @@ for (int jjj=0; jjj<numInput; jjj++) {cminIN[jjj]=1e10; cmaxIN[jjj]= -1e10;};
 	long before;
 	unsigned int num_threads = 16;
 	const unsigned int num_input = numInput+numInput*(maxInSlice-1); // 4 original values + 4*maxInSlice grid;
-	const unsigned int num_output = maxSlice+1; // plus efficiency
+	const unsigned int num_output = (maxSlice-1)+1; // plus efficiency
 	const unsigned int num_layers = 3;
 	// numeber in hidden layer 1
 	const unsigned int num_neurons_hidden_1=num_input; // (int)(inNodes/2.0);
@@ -138,7 +135,7 @@ for (int jjj=0; jjj<numInput; jjj++) {cminIN[jjj]=1e10; cmaxIN[jjj]= -1e10;};
 	const unsigned int num_neurons_hidden_2=(int)(inNodes/4.0);
 
 	const double desired_error = (const float) 0.005;
-	const unsigned int max_epochs = 300;
+	const unsigned int max_epochs = 40;
 	const unsigned int epochs_between_reports = 10;
 	// NN name
 	const char* nn_name="nn_out/neural_final.net";
@@ -151,13 +148,12 @@ for (int jjj=0; jjj<numInput; jjj++) {cminIN[jjj]=1e10; cmaxIN[jjj]= -1e10;};
 	TH1D * recOVtrue= new TH1D("rec-true", "rec-true as read from input file",maxSlice,cmin,cmax);
 	TH1D * input1eff= new TH1D("input_eff", "efficiency from input file",2,0,2);
 
-	for (unsigned int nn=0; nn<dataTrain-> num_data; nn++) {
+	for (unsigned int ev=0; ev<dataTrain->num_data; ev++) {
 		fann_type** output = dataTrain->output;
-		float v1=output[nn][0];
-		float v2=output[nn][1];
+		float v1=output[ev][0];
+		float v2=output[ev][1];
 		if (v2>0) recOVtrue->Fill(v1); // fill rec-true
 		input1eff->Fill(v2); // fill efficiency
-
 		//cout <<  nn << " " << dataTrain->num_input << endl;
 	}
 
@@ -242,7 +238,7 @@ for (int jjj=0; jjj<numInput; jjj++) {cminIN[jjj]=1e10; cmaxIN[jjj]= -1e10;};
 			// prepare new output for NN (resolution)
 			for (int kk=0; kk<maxSlice-1; kk++)  dataset1->output[ev][kk] =Slice[kk];
 			// efficiency value is unchanged
-			dataset1->output[ev][num_output-1] =v2;
+			dataset1->output[ev][maxSlice-1] =v2;
 
 			// prepare new input using grid
 			for (int kk=0; kk<numInput; kk++)  dataset1->input[ev][kk]=(input[ev][kk]-cminIN[kk])/(cmaxIN[kk]-cminIN[kk]); // 4 original (rescaled) values
@@ -253,9 +249,6 @@ for (int jjj=0; jjj<numInput; jjj++) {cminIN[jjj]=1e10; cmaxIN[jjj]= -1e10;};
 					kstart=kstart+1;
 				}
 			}
-
-
-
 		}
 
 		cerr << "  input layer:      " << num_input << " units" << endl;
@@ -446,7 +439,6 @@ for (int jjj=0; jjj<numInput; jjj++) {cminIN[jjj]=1e10; cmaxIN[jjj]= -1e10;};
 			for (int jj=0; jj<numInput; jj++) {
 				for (int kk=0; kk<maxInSlice-1; kk++)  {
 					uinput[kstart] =InSlice[jj][kk];
-					//cout << kstart << " " << uinput[kstart] << endl;
 					kstart=kstart+1;
 				}
 			}
@@ -479,7 +471,7 @@ for (int jjj=0; jjj<numInput; jjj++) {cminIN[jjj]=1e10; cmaxIN[jjj]= -1e10;};
 
 
 			//float true_value=input[ev][0];
-			int jjj=maxSlice; // efficiency
+			int jjj=maxSlice-1; // efficiency
 			float efficiency=output1[jjj];
 			out1eff->Fill( efficiency );
 

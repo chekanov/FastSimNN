@@ -22,13 +22,13 @@ void print_traindata(fann_train_data * data,  int row) {
    int  numInput=data->num_input;
    int  numOut=data->num_output;
 
-   cout << row << " row Input:" << endl;
+   cout << "\n"<< row << ") row input:" << endl;
    for (int k=0; k<numInput; k++){
       cout << "("<<k<<")" << input[row][k] << " ";
    }
    cout << "" << endl;
 
-   cout << row << " row Output:" << endl;
+   cout << row << " row output:" << endl;
    for (int k=0; k<numOut; k++){
       cout << "("<<k<<")" << output[row][k] << " ";
    }
