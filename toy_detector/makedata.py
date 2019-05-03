@@ -18,6 +18,7 @@ if (len(sys.argv) > 1):
    
 if ("train" in myinput):  random.seed(10)
 if ("val" in myinput):  random.seed(20)
+if ("test" in myinput):  random.seed(30)
  
 print "Output file name is =",myinput
 

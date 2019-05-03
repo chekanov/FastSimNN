@@ -16,9 +16,6 @@
 #include <dirent.h>
 #include <string>
 #include <vector>
-#include <map>
-#include <stdio.h>
-
 // check directory
 #include <TROOT.h>
 #include <TFile.h>
@@ -27,11 +24,6 @@
 #include <TH1D.h>
 #include <TH2D.h>
 #include "TMath.h"
-#include"time.h"
-#include <dirent.h>
-#include <string>
-#include <vector>
-#include <map>
 #include <stdio.h>
 #include <stdlib.h>
 #include <TProfile2D.h>
@@ -57,7 +49,7 @@ int main(int argc, char **argv)
 {
 
 
-        bool debug=false;
+	const bool debug=false;
 
 	// how many slices assume 200 slices
 	const int maxSlice=100;
@@ -65,7 +57,7 @@ int main(int argc, char **argv)
 	const int maxInSlice=20;
 	cout << "Start calculations with " << maxInSlice << " input slices" << endl;
 
-	double nnToFreq=1000000;
+	const double nnToFreq=1000000;
 	cout << "NN to freq. conversion " << nnToFreq << " slices" << endl;
 
 	if (argc != 2) {
@@ -131,9 +123,9 @@ for (int jjj=0; jjj<numInput; jjj++) {cminIN[jjj]=1e10; cmaxIN[jjj]= -1e10;};
 		}
 	}
 
-        cout << "Min and Max values for input variables: " << endl; 
-        for (int jjj=0; jjj<numInput; jjj++) 
-           cout << "n=" << jjj << " min=" << cminIN[jjj] << " " << cmaxIN[jjj] << endl;
+	cout << "Min and Max values for input variables: " << endl;
+	for (int jjj=0; jjj<numInput; jjj++)
+		cout << "n=" << jjj << " min=" << cminIN[jjj] << " " << cmaxIN[jjj] << endl;
 
 	long before;
 	unsigned int num_threads = 16;
@@ -146,7 +138,7 @@ for (int jjj=0; jjj<numInput; jjj++) {cminIN[jjj]=1e10; cmaxIN[jjj]= -1e10;};
 	const unsigned int num_neurons_hidden_2=(int)(inNodes/4.0);
 
 	const double desired_error = (const float) 0.005;
-	const unsigned int max_epochs = 200;
+	const unsigned int max_epochs = 300;
 	const unsigned int epochs_between_reports = 10;
 	// NN name
 	const char* nn_name="nn_out/neural_final.net";
@@ -179,8 +171,8 @@ for (int jjj=0; jjj<numInput; jjj++) {cminIN[jjj]=1e10; cmaxIN[jjj]= -1e10;};
 	cout << "  RMS90=" << rms90 << endl;
 	cout << "  min and max " << cmin << " - " << cmax << endl;
 	// redefine ranges based on RMS
-	double Xmin=mean-3*rms;
-	double Xmax=mean+3*rms;
+	const double Xmin=mean-3*rms;
+	const double Xmax=mean+3*rms;
 	cout << "  Used min and max " << Xmin << " " << Xmax << endl;
 
 	double mean_eff=input1eff->GetMean();
@@ -188,8 +180,8 @@ for (int jjj=0; jjj<numInput; jjj++) {cminIN[jjj]=1e10; cmaxIN[jjj]= -1e10;};
 
 	TH1D * input1res= new TH1D("input_res", "rec-true after sliced resolution",maxSlice,Xmin,Xmax);
 
-	double del=(Xmax - Xmin) / (maxSlice-1);
-	cout << "  Used step= " << del << endl;
+	const double del=(Xmax - Xmin) / (maxSlice-1);
+	cout << "  Used step to bin resolution= " << del << endl;
 
 
 	// keep binning for resolution
@@ -210,12 +202,12 @@ for (int jjj=0; jjj<numInput; jjj++) {cminIN[jjj]=1e10; cmaxIN[jjj]= -1e10;};
 		fann_type** input = dataTrain->input;
 		fann_type** output = dataTrain->output;
 
-		for (int nn=0; nn<totalEvents; nn++){
+		for (int ev=0; ev<totalEvents; ev++){
 
 			// slice output (1st variable only)
 			float Slice[maxSlice-1];
-			float v1=output[nn][0]; // this one is difference rec-true
-			float v2=output[nn][1]; /// this is efficiency 0 or 1
+			float v1=output[ev][0]; // this one is difference rec-true
+			float v2=output[ev][1]; // this is efficiency 0 or 1
 
 			for (int jjj=0; jjj<maxSlice-1; jjj++) {
 				float d1=Xmin+jjj* del;
@@ -225,10 +217,10 @@ for (int jjj=0; jjj<numInput; jjj++) {cminIN[jjj]=1e10; cmaxIN[jjj]= -1e10;};
 				if (v2==0) Slice[jjj]=0; // 0 if did not pass efficiency
 			}
 
-			// slice all input variables 
+			// slice all input variables
 			float InSlice[numInput][maxInSlice-1];
 			for (int jj=0; jj<numInput; jj++) {
-				float vv=input[nn][jj];
+				float vv=input[ev][jj];
 				float XM=cminIN[jj];
 				float del2=(cmaxIN[jj] - cminIN[jj]) / (maxInSlice-1);
 				for (int jjj=0; jjj<maxInSlice-1; jjj++) {
@@ -243,23 +235,22 @@ for (int jjj=0; jjj<numInput; jjj++) {cminIN[jjj]=1e10; cmaxIN[jjj]= -1e10;};
 
 			// check the histogram
 			for (int jjj=0; jjj<maxSlice-1; jjj++) {
-				float d1=Xmin+jjj* del;
+				float d1=Xmin+jjj*del;
 				input1res->Fill(d1+0.5*del,Slice[jjj]);
 			}
 
 			// prepare new output for NN (resolution)
-			for (int kk=0; kk<maxSlice-1; kk++)  dataset1->output[nn][kk] =Slice[kk];
+			for (int kk=0; kk<maxSlice-1; kk++)  dataset1->output[ev][kk] =Slice[kk];
 			// efficiency value is unchanged
-			dataset1->output[nn][num_output-1] =v2;
-
+			dataset1->output[ev][num_output-1] =v2;
 
 			// prepare new input using grid
-			for (unsigned int kk=0; kk<numInput; kk++)  dataset1->input[nn][kk]=(input[nn][kk]-cminIN[kk])/(cmaxIN[kk]-cminIN[kk]); // 4 original (rescaled) values
+			for (int kk=0; kk<numInput; kk++)  dataset1->input[ev][kk]=(input[ev][kk]-cminIN[kk])/(cmaxIN[kk]-cminIN[kk]); // 4 original (rescaled) values
 			int kstart=numInput;
 			for (int jj=0; jj<numInput; jj++) {
 				for (int kk=0; kk<maxInSlice-1; kk++)  {
-					dataset1->input[nn][kstart] =InSlice[jj][kk];
-                                        kstart=kstart+1;
+					dataset1->input[ev][kstart] =InSlice[jj][kk];
+					kstart=kstart+1;
 				}
 			}
 
@@ -308,12 +299,12 @@ for (int jjj=0; jjj<numInput; jjj++) {cminIN[jjj]=1e10; cmaxIN[jjj]= -1e10;};
 		out_error << "# epoch  training-MSE validation-MSE" << endl;
 
 
-                 // debug first 3 rows
-                 if (debug) {
-                 print_traindata(dataset1,0);
-                 print_traindata(dataset1,1);
-                 print_traindata(dataset1,2);
-                 }
+		// debug first 3 rows
+		if (debug) {
+			print_traindata(dataset1,0);
+			print_traindata(dataset1,1);
+			print_traindata(dataset1,2);
+		}
 
 		std::vector<double> last_val_errors;
 		double last_val_error=10000;
@@ -393,6 +384,10 @@ for (int jjj=0; jjj<numInput; jjj++) {cminIN[jjj]=1e10; cmaxIN[jjj]= -1e10;};
 
 
 
+
+	/*************************************************************************
+	* Running over NN and create NN prediction
+	*************************************************************************/
 	if (rtype == "run") {
 
 		ofstream myfile;
@@ -404,10 +399,9 @@ for (int jjj=0; jjj<numInput; jjj++) {cminIN[jjj]=1e10; cmaxIN[jjj]= -1e10;};
 
 		cout << endl << "Testing network: open " << nn_name << endl;
 		struct fann *ann_new = fann_create_from_file(nn_name);
-		//const char* testFile="data/valid1.data";
-
-                const char* testFile="data/train1.data";
-
+		const char* testFile="data/test1.data";
+		// this is for debuging inputs
+		//const char* testFile="data/train1.data";
 		cout << "Read test: " << testFile << endl;
 		struct fann_train_data *data = fann_read_train_from_file( testFile );
 		// write header file
@@ -416,7 +410,6 @@ for (int jjj=0; jjj<numInput; jjj++) {cminIN[jjj]=1e10; cmaxIN[jjj]= -1e10;};
 		// for NN, scale it
 		//fann_scale_input_train_data(data, 0, 1.0);
 
-
 		//cout << "..randomize data.. " << endl;
 		//fann_shuffle_train_data(data);
 
@@ -424,19 +417,19 @@ for (int jjj=0; jjj<numInput; jjj++) {cminIN[jjj]=1e10; cmaxIN[jjj]= -1e10;};
 		fann_type** input = data->input;
 		fann_type** output = data->output;
 
-		for (int m=0; m<totalEvents; m++){
+		for (int ev=0; ev<totalEvents; ev++){
 
 			// write original
-			for (unsigned int kk=0; kk< data->num_input; kk++) myfile <<  input[m][kk] << " ";
+			for (unsigned int kk=0; kk< data->num_input; kk++) myfile <<  input[ev][kk] << " ";
 			myfile << "" << endl;
 
-			// prepare new rescale input
+			// prepare new rescaled  input
 			fann_type uinput[num_input];
 
-			// slice input variables 
+			// slice input variables
 			float InSlice[numInput][maxInSlice-1];
 			for (int jj=0; jj<numInput; jj++) {
-				float vv=input[m][jj];
+				float vv=input[ev][jj];
 				float XM=cminIN[jj];
 				float del2=(cmaxIN[jj] - cminIN[jj]) / (maxInSlice-1);
 				for (int jjj=0; jjj<maxInSlice-1; jjj++) {
@@ -447,30 +440,28 @@ for (int jjj=0; jjj<numInput; jjj++) {cminIN[jjj]=1e10; cmaxIN[jjj]= -1e10;};
 				}
 			}
 
-
-
 			// normalize 4 first values
-			for (unsigned int kk=0; kk<numInput; kk++)  uinput[kk]=(input[m][kk]-cminIN[kk])/(cmaxIN[kk]-cminIN[kk]); // 4 original (rescaled) values
+			for (int kk=0; kk<numInput; kk++)  uinput[kk]=(input[ev][kk]-cminIN[kk])/(cmaxIN[kk]-cminIN[kk]); // 4 original (rescaled) values
 			int kstart=numInput;
 			for (int jj=0; jj<numInput; jj++) {
 				for (int kk=0; kk<maxInSlice-1; kk++)  {
 					uinput[kstart] =InSlice[jj][kk];
-                                        //cout << kstart << " " << uinput[kstart] << endl;
-                                        kstart=kstart+1;
+					//cout << kstart << " " << uinput[kstart] << endl;
+					kstart=kstart+1;
 				}
 			}
 
 
-                      // debug first 2 rows 
-                      if (debug) {
-                      if (m<5){
-                        cout << m << " row Input:" << endl;
-                        for (int k=0; k<num_input; k++){
-                               cout <<  "("<<k<<")" << uinput[k] << " ";
-                        }
-                        cout << "" << endl;
-                        }
-                      }
+			// debug first 2 rows
+			if (debug) {
+				if (ev<5){
+					cout << ev << " row Input:" << endl;
+					for (unsigned int k=0; k<num_input; k++){
+						cout <<  "("<<k<<")" << uinput[k] << " ";
+					}
+					cout << "" << endl;
+				}
+			}
 
 			// use new rescaled input
 			fann_type * output1 = fann_run(ann_new, uinput);
@@ -487,7 +478,7 @@ for (int jjj=0; jjj<numInput; jjj++) {cminIN[jjj]=1e10; cmaxIN[jjj]= -1e10;};
 
 
 
-			float true_value=input[m][0];
+			//float true_value=input[ev][0];
 			int jjj=maxSlice; // efficiency
 			float efficiency=output1[jjj];
 			out1eff->Fill( efficiency );
@@ -506,7 +497,6 @@ for (int jjj=0; jjj<numInput; jjj++) {cminIN[jjj]=1e10; cmaxIN[jjj]= -1e10;};
 			if (isExist>0) {
 				int BinSelected=myRand(BinOverTrue, INSlice, maxSlice-1); // select random value (bin) assuming frequencies
 				reco_value=BinSelected;
-				//cout << BinSelected  << endl;
 				out2res->Fill( reco_value );
 			}
 			myfile <<  reco_value  << " " <<   isExist  << endl;
