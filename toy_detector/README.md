@@ -32,7 +32,7 @@ The program "ana.cc" is designed to train NN and create predictions.
 The program can be compiled as "make". To run on the ANL ATLAS cluster.
 
 ```
-./A_RUN                         # run  
+./A_RUN        # run NN training and then validation 
 ```
 It will train NN  using the file train1.data, and then validate the training 
 (or make predictions) using valid1.data.
