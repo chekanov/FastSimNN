@@ -3,7 +3,7 @@
 # apply cut on 2nd input
 # this is a cut on 2nd input variable which changes betwenn -pi and pi
 # The spread of 1st variable significantly depends on 2nd variable
-Cut1=-9999
+Cut1=0.5 
 
 # apply cut on 3rd input
 # this is a cut on 2nd input variable which changes betwenn -pi and pi

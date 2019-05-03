@@ -18,7 +18,6 @@
 #include <vector>
 #include <map>
 #include <stdio.h>
-#include <stdlib.h>
 
 // check directory
 #include <TROOT.h>
@@ -50,18 +49,25 @@ const double k2PI  = 2*kPI;
 extern double RMS90(TH1*);
 int findCeil(int  arr[], int r, int l, int h);
 int myRand(int arr[], int freq[], int n);
+void print_traindata(fann_train_data * data, int row);
+
 
 // main example
 int main(int argc, char **argv)
 {
 
+
+        bool debug=false;
+
 	// how many slices assume 200 slices
 	const int maxSlice=100;
-	cout << "\n\nStart calculations with " << maxSlice << " slices" << endl;
+	cout << "\n\nStart calculations with " << maxSlice << " output slices" << endl;
+	const int maxInSlice=20;
+	cout << "Start calculations with " << maxInSlice << " input slices" << endl;
 
-        double nnToFreq=1000000;
-        cout << "NN to freq. conversion " << nnToFreq << " slices" << endl;
- 
+	double nnToFreq=1000000;
+	cout << "NN to freq. conversion " << nnToFreq << " slices" << endl;
+
 	if (argc != 2) {
 		cerr << " Unexpected number of command-line arguments. \n Set: train or run"
 		<< " Program stopped! " << endl;
@@ -96,13 +102,15 @@ int main(int argc, char **argv)
 	// read data for training..
 	struct fann_train_data * dataTrain = fann_read_train_from_file(trainFile);
 	cout << "Shuffle: " << trainFile << endl;
-	fann_shuffle_train_data(dataTrain);
+	// fann_shuffle_train_data(dataTrain);
 
 	cout << "calculate min and max for differences" << endl;
 	double cmin = 1e10;  double cmax = -1e10;
-        int totalEvents = dataTrain-> num_data;
+	int totalEvents = dataTrain-> num_data;
+	int  numInput=dataTrain->num_input;
 
-	for (unsigned int nn=0; nn<totalEvents; nn++) {
+	// min and max for outputs
+	for (int nn=0; nn<totalEvents; nn++) {
 		fann_type** output = dataTrain->output;
 		float v1=output[nn][0];
 		if (v1 < cmin) cmin = v1;
@@ -111,13 +119,29 @@ int main(int argc, char **argv)
 		//cout <<  nn << " " << dataTrain->num_input << endl;
 	}
 
+	// min and max values of inputs to put to the grid
+	double cminIN[numInput], cmaxIN[numInput];
+for (int jjj=0; jjj<numInput; jjj++) {cminIN[jjj]=1e10; cmaxIN[jjj]= -1e10;};
+	for (int nn=0; nn<totalEvents; nn++) {
+		fann_type** input = dataTrain->input;
+		for (int jjj=0; jjj<numInput; jjj++) {
+			float v1=input[nn][jjj];
+			if (v1 < cminIN[jjj]) cminIN[jjj] = v1;
+			if (v1 > cmaxIN[jjj]) cmaxIN[jjj] = v1;
+		}
+	}
+
+        cout << "Min and Max values for input variables: " << endl; 
+        for (int jjj=0; jjj<numInput; jjj++) 
+           cout << "n=" << jjj << " min=" << cminIN[jjj] << " " << cmaxIN[jjj] << endl;
+
 	long before;
 	unsigned int num_threads = 16;
-	const unsigned int num_input = inNodes;
+	const unsigned int num_input = numInput+numInput*(maxInSlice-1); // 4 original values + 4*maxInSlice grid;
 	const unsigned int num_output = maxSlice+1; // plus efficiency
 	const unsigned int num_layers = 3;
 	// numeber in hidden layer 1
-	const unsigned int num_neurons_hidden_1=50; // (int)(inNodes/2.0);
+	const unsigned int num_neurons_hidden_1=num_input; // (int)(inNodes/2.0);
 	// number in hidden layer 2
 	const unsigned int num_neurons_hidden_2=(int)(inNodes/4.0);
 
@@ -127,10 +151,10 @@ int main(int argc, char **argv)
 	// NN name
 	const char* nn_name="nn_out/neural_final.net";
 
-        string outputfile="data/input.root";
-        if (rtype == "run") outputfile="data/output.root";
-        cout << "\n -> Output file is =" << outputfile << endl;
-        TFile * RootFile = new TFile(outputfile.c_str(), "RECREATE", "Histogram file");
+	string outputfile="data/input.root";
+	if (rtype == "run") outputfile="data/output.root";
+	cout << "\n -> Output file is =" << outputfile << endl;
+	TFile * RootFile = new TFile(outputfile.c_str(), "RECREATE", "Histogram file");
 
 	TH1D * recOVtrue= new TH1D("rec-true", "rec-true as read from input file",maxSlice,cmin,cmax);
 	TH1D * input1eff= new TH1D("input_eff", "efficiency from input file",2,0,2);
@@ -164,20 +188,20 @@ int main(int argc, char **argv)
 
 	TH1D * input1res= new TH1D("input_res", "rec-true after sliced resolution",maxSlice,Xmin,Xmax);
 
-	double del=(Xmax - Xmin) / maxSlice;
+	double del=(Xmax - Xmin) / (maxSlice-1);
 	cout << "  Used step= " << del << endl;
 
 
-        // keep binning for resolution  
-        int  BinOverTrue[maxSlice-1];
-        for (int jjj=0; jjj<maxSlice-1; jjj++) {
-                             float d1=Xmin+jjj* del;
-                             BinOverTrue[jjj]=(int)d1; 
-                        }
+	// keep binning for resolution
+	int  BinOverTrue[maxSlice-1];
+	for (int jjj=0; jjj<maxSlice-1; jjj++) {
+		float d1=Xmin+jjj* del;
+		BinOverTrue[jjj]=(int)d1;
+	}
 
-// ***********************************************************************
-// ---------------------- this part for training -------------------------
-// ***********************************************************************
+	// ***********************************************************************
+	// ---------------------- this part for training -------------------------
+	// ***********************************************************************
 	if (rtype == "train") {
 
 		// rebuild train data
@@ -186,23 +210,35 @@ int main(int argc, char **argv)
 		fann_type** input = dataTrain->input;
 		fann_type** output = dataTrain->output;
 
-		for (unsigned int nn=0; nn<totalEvents; nn++){
+		for (int nn=0; nn<totalEvents; nn++){
 
-
-			for (int kk=0; kk<num_input; kk++)  dataset1->input[nn][kk] =input[nn][kk];
-
-			//float in=input[nn][0]; // 1st variable is active input
+			// slice output (1st variable only)
 			float Slice[maxSlice-1];
 			float v1=output[nn][0]; // this one is difference rec-true
-			float v2=output[nn][1]; /// this is efficiency 0 or 1 
+			float v2=output[nn][1]; /// this is efficiency 0 or 1
 
 			for (int jjj=0; jjj<maxSlice-1; jjj++) {
 				float d1=Xmin+jjj* del;
 				float d2=d1+del;
 				if (v1>d1  && v1<=d2) Slice[jjj]=1.0f;
 				else Slice[jjj]=0;
-                                if (v2==0) Slice[jjj]=0; // 0 if did not pass efficiency 
+				if (v2==0) Slice[jjj]=0; // 0 if did not pass efficiency
 			}
+
+			// slice all input variables 
+			float InSlice[numInput][maxInSlice-1];
+			for (int jj=0; jj<numInput; jj++) {
+				float vv=input[nn][jj];
+				float XM=cminIN[jj];
+				float del2=(cmaxIN[jj] - cminIN[jj]) / (maxInSlice-1);
+				for (int jjj=0; jjj<maxInSlice-1; jjj++) {
+					float d1=XM+jjj* del2;
+					float d2=d1+del2;
+					if (vv>d1  && vv<=d2) InSlice[jj][jjj]=1.0f;
+					else InSlice[jj][jjj]=0;
+				}
+			}
+
 
 
 			// check the histogram
@@ -211,10 +247,23 @@ int main(int argc, char **argv)
 				input1res->Fill(d1+0.5*del,Slice[jjj]);
 			}
 
-                        // prepare new output for NN (resolution)
+			// prepare new output for NN (resolution)
 			for (int kk=0; kk<maxSlice-1; kk++)  dataset1->output[nn][kk] =Slice[kk];
 			// efficiency value is unchanged
 			dataset1->output[nn][num_output-1] =v2;
+
+
+			// prepare new input using grid
+			for (unsigned int kk=0; kk<numInput; kk++)  dataset1->input[nn][kk]=(input[nn][kk]-cminIN[kk])/(cmaxIN[kk]-cminIN[kk]); // 4 original (rescaled) values
+			int kstart=numInput;
+			for (int jj=0; jj<numInput; jj++) {
+				for (int kk=0; kk<maxInSlice-1; kk++)  {
+					dataset1->input[nn][kstart] =InSlice[jj][kk];
+                                        kstart=kstart+1;
+				}
+			}
+
+
 
 		}
 
@@ -227,7 +276,7 @@ int main(int argc, char **argv)
 
 
 		// scale input. Output does not need to be scaled
-		fann_scale_input_train_data(dataset1, 0, 1.0);
+		//fann_scale_input_train_data(dataset1, 0, 1.0);
 		//   fann_set_scaling_params(dataset1, ann, -1.0, 1.0, -1.0, 1.0);
 
 
@@ -247,7 +296,7 @@ int main(int argc, char **argv)
 
 
 		fann_randomize_weights(ann,0,1.0);
-		//fann_print_connections(ann);
+		if (debug) fann_print_connections(ann);
 		fann_print_parameters(ann);
 
 		cout << "Total number of neurons=" << fann_get_total_neurons(ann) << endl;
@@ -258,6 +307,13 @@ int main(int argc, char **argv)
 		std::ofstream out_error("nn_out/training_mse.d");
 		out_error << "# epoch  training-MSE validation-MSE" << endl;
 
+
+                 // debug first 3 rows
+                 if (debug) {
+                 print_traindata(dataset1,0);
+                 print_traindata(dataset1,1);
+                 print_traindata(dataset1,2);
+                 }
 
 		std::vector<double> last_val_errors;
 		double last_val_error=10000;
@@ -339,78 +395,121 @@ int main(int argc, char **argv)
 
 	if (rtype == "run") {
 
-                ofstream myfile;
-                myfile.open ("data/neuralnet.data"); // output file 
+		ofstream myfile;
+		myfile.open ("data/neuralnet.data"); // output file
 
 		TH1D * out1res= new TH1D("nn_res", "resolution from NN nodes",maxSlice,Xmin,Xmax);
 		TH1D * out1eff= new TH1D("nn_eff", "efficiency from NN nodes",100,0,1.0);
-                TH1D * out2res= new TH1D("predicted_res", "predicted resolution (final)",maxSlice,Xmin,Xmax);
+		TH1D * out2res= new TH1D("predicted_res", "predicted resolution (final)",maxSlice,Xmin,Xmax);
 
 		cout << endl << "Testing network: open " << nn_name << endl;
 		struct fann *ann_new = fann_create_from_file(nn_name);
-		const char* testFile="data/valid1.data";
+		//const char* testFile="data/valid1.data";
+
+                const char* testFile="data/train1.data";
+
 		cout << "Read test: " << testFile << endl;
 		struct fann_train_data *data = fann_read_train_from_file( testFile );
-                // write header file
-                myfile << data->num_data << " " << data->num_input << " " << data->num_output << "\n";
+		// write header file
+		myfile << data->num_data << " " << data->num_input << " " << data->num_output << "\n";
 
-                // for NN, scale it
-		fann_scale_input_train_data(data, 0, 1.0);
+		// for NN, scale it
+		//fann_scale_input_train_data(data, 0, 1.0);
 
 
 		//cout << "..randomize data.. " << endl;
 		//fann_shuffle_train_data(data);
 
 		int totalEvents = data-> num_data;
-		//fann_type** input = data->input;
-		//fann_type** output = data->output;
-
-                // read data again (original, no scaling)
-                struct fann_train_data *original = fann_read_train_from_file( testFile );
-                fann_type** original_input = original->input;
+		fann_type** input = data->input;
+		fann_type** output = data->output;
 
 		for (int m=0; m<totalEvents; m++){
 
-			//fann_scale_input( ann_new, data->input[m] );
+			// write original
+			for (unsigned int kk=0; kk< data->num_input; kk++) myfile <<  input[m][kk] << " ";
+			myfile << "" << endl;
 
-                        int INSlice[maxSlice-1];
+			// prepare new rescale input
+			fann_type uinput[num_input];
 
-                        // write original 
-                        for (int kk=0; kk<data->num_input; kk++) myfile <<  original_input[m][kk] << " "; 
-                        myfile << "" << endl;
+			// slice input variables 
+			float InSlice[numInput][maxInSlice-1];
+			for (int jj=0; jj<numInput; jj++) {
+				float vv=input[m][jj];
+				float XM=cminIN[jj];
+				float del2=(cmaxIN[jj] - cminIN[jj]) / (maxInSlice-1);
+				for (int jjj=0; jjj<maxInSlice-1; jjj++) {
+					float d1=XM+jjj* del2;
+					float d2=d1+del2;
+					if (vv>d1  && vv<=d2) InSlice[jj][jjj]=1.0f;
+					else InSlice[jj][jjj]=0;
+				}
+			}
 
-			fann_type * output1 = fann_run(ann_new, data->input[m]);
+
+
+			// normalize 4 first values
+			for (unsigned int kk=0; kk<numInput; kk++)  uinput[kk]=(input[m][kk]-cminIN[kk])/(cmaxIN[kk]-cminIN[kk]); // 4 original (rescaled) values
+			int kstart=numInput;
+			for (int jj=0; jj<numInput; jj++) {
+				for (int kk=0; kk<maxInSlice-1; kk++)  {
+					uinput[kstart] =InSlice[jj][kk];
+                                        //cout << kstart << " " << uinput[kstart] << endl;
+                                        kstart=kstart+1;
+				}
+			}
+
+
+                      // debug first 2 rows 
+                      if (debug) {
+                      if (m<5){
+                        cout << m << " row Input:" << endl;
+                        for (int k=0; k<num_input; k++){
+                               cout <<  "("<<k<<")" << uinput[k] << " ";
+                        }
+                        cout << "" << endl;
+                        }
+                      }
+
+			// use new rescaled input
+			fann_type * output1 = fann_run(ann_new, uinput);
+
+
+			int INSlice[maxSlice-1];
 			for (int jjj=0; jjj<maxSlice-1; jjj++) {
 				// cout << output1[jjj] << endl;
 				float d1=Xmin+jjj* del;
 				//float d2=d1+del;
-                                INSlice[jjj]=(int)( output1[jjj]*nnToFreq ); // convert to int 
-				out1res->Fill(d1+0.5*del,(double)INSlice[jjj]); //  
+				INSlice[jjj]=(int)( output1[jjj]*nnToFreq ); // convert to int
+				out1res->Fill(d1+0.5*del,(double)INSlice[jjj]); //
 			}
 
-                        float true_value=original_input[m][0];
-                        int jjj=maxSlice; // efficiency
-                        float efficiency=output1[jjj];
-                        out1eff->Fill( efficiency );
 
 
-                        //cout << "efficiency =" <<  output1[jjj] << endl;
+			float true_value=input[m][0];
+			int jjj=maxSlice; // efficiency
+			float efficiency=output1[jjj];
+			out1eff->Fill( efficiency );
 
-                        float isExist=1;
-                        // efficiency. Make randon (0-1) 
-                        float r = ((double) rand() / (RAND_MAX)); 
-                        if (r<(1-efficiency))  isExist=0;
 
-                       //cout << r << "  " << output1[jjj] << endl;
+			//cout << "efficiency =" <<  output1[jjj] << endl;
 
-                        float reco_value=0;
-                        if (isExist>0) {
-                          int BinSelected=myRand(BinOverTrue, INSlice, maxSlice-1); // select random value (bin) assuming frequencies
-                          reco_value=BinSelected;
-                          //cout << BinSelected  << endl;
-                          out2res->Fill( reco_value );
-                        }
-                        myfile <<  reco_value  << " " <<   isExist  << endl;
+			float isExist=1;
+			// efficiency. Make randon (0-1)
+			float r = ((double) rand() / (RAND_MAX));
+			if (r<(1-efficiency))  isExist=0;
+
+			//cout << r << "  " << output1[jjj] << endl;
+
+			float reco_value=0;
+			if (isExist>0) {
+				int BinSelected=myRand(BinOverTrue, INSlice, maxSlice-1); // select random value (bin) assuming frequencies
+				reco_value=BinSelected;
+				//cout << BinSelected  << endl;
+				out2res->Fill( reco_value );
+			}
+			myfile <<  reco_value  << " " <<   isExist  << endl;
 
 		}
 
@@ -427,7 +526,7 @@ int main(int argc, char **argv)
 		cout << "  efficiency mean=" << mean_2eff  << " true=" << mean_eff << endl;
 
 
-                myfile.close();
+		myfile.close();
 		RootFile->Write();
 		RootFile->Print();
 		RootFile->Close();
