@@ -34,18 +34,18 @@ It will train NN  using the file train1.data, and then validate the training
 The NN will be written inside "nn_out". 
 
 The NN-predicted file is "data/neuralnet.data". It has the same input as valid1.data,
-but each record has predicted reco-true value and "efficiency" (0,1).   
+but each record has predicted reco-true value and "efficiency" (values 0 or 1).   
 
+# Compare NN data with validation data
 
-The you can compare validation with NN sample using "plotme.py"
+You can compare validation sample in "valid1.data" with NN sample "neuralnet.data" 
+using "plotme.py" script ("python plotme.py"). It will make the "resolution" plots. 
 You can set cuts "Cut1" on the 2nd value of the input, to see how the predicted value
-can change.
+can change the resolution.
 
 # History
 
- - Version 1.0 December 1, 2018: Initial version
- - Version 2.0 December 14, 2018: Corrected Eta resolution
- - Version 3.0 December 16, 2018: Added muons, electrons, photons
+ - Version 1.0 May 2, 2019: First version
 
 # Contact 
 Send  comments to S.Chekanov (ANL)
