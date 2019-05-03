@@ -6,10 +6,13 @@ Make sure $ROOTSYS and $FANN are set (point to ROOT and FANN packages).
 # How to create input data 
 
 First, make 2 files with training (train1.data) and validation data (valid1.data).
-Each input record has 4 values. 1st value (true) is used to train NN. 
+Each input record has 4 values. 1st value (true) is used to create rec-true. 
 The output record has  2 values. 1st value is difference reco-true (where true is the 1st value
-of the input record). Note that reco-true difference is affected by other 3 values in the input record.
+of the input record). Note that reco-true difference is affected by other 3 values 
+in the input record.
 2nd value is "0" (event did not pass) or "1" the event was correctly processed.
+Read the file makedata.py where you can modify this transform.
+
 
 ```
 python2 makedata.py train1.data # training sample
@@ -18,7 +21,7 @@ python2 makedata.py valid1.data # validation sample
 
 The files will be stored in the "data" directory
 
-# Now train NN and make predictions 
+# Train NN and make predictions 
 
 The program "ana.cc" is designed to train NN and create predictions.
 The program can be compiled as "make". To run on the ANL ATLAS cluster.
