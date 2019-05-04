@@ -1,0 +1,73 @@
+#!/bin/bash
+# set up root
+XPWD=`pwd`
+echo $XPWD
+
+source ./setup.sh
+
+rm -f delphes
+ln -s $DELPHES delphes 
+
+rm -f analysis 
+make -f Makefile
+
+NEVENTS=200100
+
+# /netapp/data/hepsim/events/pp/13tev/pythia8_qcd_jz/JZ7/rfast106/
+# XF="rfast106"
+# DIR=/netapp/data/hepsim/events/pp/13tev/pythia8_qcd_jz/JZ7/$XF
+
+XF="rfast008"
+echo "####  Running $XF"
+rm -f out_ann/*
+rm -r out_ann_$XF
+rm -f data.in
+DIR=/netapp/data/hepsim/events/pp/14tev/mg5_ttbar_jet/$XF
+./Make_input $DIR/
+head -n 11 data.in > a1 
+DIR=/netapp/data/hepsim/events/pp/14tev/pythia8_gammajets_wgt/$XF
+./Make_input $DIR/
+head -n 10 data.in > a2
+cat a1 a2 > data.in
+rm -f a1 a2
+echo "Run $XF"
+./analysis $NEVENTS
+mv Analysis.root out_root/$XF.root
+cp -r out_ann out_ann_$XF
+
+
+XF="rfast007"
+echo "#######  Running $XF"
+# remove all ANN files if you start a new ANN training
+rm -f out_ann/*
+rm -r out_ann_$XF
+rm -f data.in
+# we use 21 file from HepSim
+DIR=/netapp/data/hepsim/events/pp/14tev/mg5_ttbar_jet/$XF
+./Make_input $DIR/
+head -n 11 data.in > a1
+DIR=/netapp/data/hepsim/events/pp/14tev/pythia8_gammajets_wgt/$XF
+./Make_input $DIR/
+head -n 10 data.in > a2
+cat a1 a2 > data.in
+rm -f a1 a2
+echo "Run $XF"
+./analysis $NEVENTS
+mv Analysis.root out_root/$XF.root
+cp -r out_ann out_ann_$XF
+
+
+XF="rfast006"
+echo "#######  Running $XF"
+DIR=/netapp/data/hepsim/events/pp/14tev/mg5_ttbar_jet/$XF
+# remove all ANN files if you start a new ANN training
+rm -f out_ann/*
+rm -r out_ann_$XF
+rm -f data.in
+./Make_input $DIR/
+echo "Run $XF"
+./analysis $NEVENTS
+mv Analysis.root out_root/$XF.root
+cp -r out_ann out_ann_$XF
+
+

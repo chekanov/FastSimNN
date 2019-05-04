@@ -1,0 +1,29 @@
+#!/bin/bash
+# set up root
+XPWD=`pwd`
+echo $XPWD
+
+source ./setup.sh
+
+rm -f delphes
+ln -s $DELPHES delphes 
+
+rm -f analysis 
+make -f Makefile
+
+NEVENTS=200100
+
+# /netapp/data/hepsim/events/pp/13tev/pythia8_qcd_jz/JZ7/rfast106/
+# XF="rfast106"
+# DIR=/netapp/data/hepsim/events/pp/13tev/pythia8_qcd_jz/JZ7/$XF
+
+XF="rfast008"
+echo "####  Running $XF"
+DIR=/netapp/data/hepsim/events/pp/14tev/pythia8_gammajets_wgt/$XF
+./Make_input $DIR/
+echo "Run $XF"
+./analysis $NEVENTS
+
+
+
+
