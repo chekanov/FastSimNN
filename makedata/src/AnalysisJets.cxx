@@ -15,7 +15,7 @@ Int_t Ana::AnalysisJets(vector<LParticle> JetsTrue, vector<LParticle> JetsReco) 
 		float ptT =  L2.Perp();
 		float etaT = L2.PseudoRapidity();
 		float massT =  L2.M();
-                float btagT=(float)tjet.GetType(); // get  b-quark in 10x100%
+                float btagT=(float)tjet.GetType()/1000.0; // get  b-quark in 10x100%
                 float jetrT=(float)(tjet.GetCharge()/10000.0); // get jet radius in Eta and Phi 
                 float jetE=L2.E(); // energy 
                 jetrT =  jetrT / sqrt(jetE); // effective jet radius in GeV-1/2 (sqrt to increase values) 
@@ -82,9 +82,15 @@ Int_t Ana::AnalysisJets(vector<LParticle> JetsTrue, vector<LParticle> JetsReco) 
    if (nevv%nBatch == 0  && nevv>1) {
                 cout << "\033[1;31m Writing data with jets \033[0m\n";
 
-                std::string s = "data/jet_pt_data"+std::to_string(batch_jet);
+                std::string s = "out_ann/jet_pt_v"+std::to_string(batch_jet)+".d";
                 ofstream myfile;
                 myfile.open (s); // output file
+
+                vector<float> input = finput_jets[0];
+                vector<float> output = foutput_jets[0];
+                myfile << finput_jets.size() <<  " " <<  input.size() << " " << output.size() << endl;
+
+                cout << "Total entries to write:" << finput_jets.size() << endl;
 
 // create a dataset for a given bin
                         int nn=0;
@@ -102,9 +108,7 @@ Int_t Ana::AnalysisJets(vector<LParticle> JetsTrue, vector<LParticle> JetsReco) 
 
                                  for (unsigned int kk=0; kk< input.size(); kk++) myfile <<  input[kk] << " ";
                                  myfile << "" << endl;
-                                 myfile <<  pt  << " " <<   eff  << endl;
-
-
+                                 myfile <<  (pt-ptT)  << " " <<   eff  << endl;
 
                             }
 

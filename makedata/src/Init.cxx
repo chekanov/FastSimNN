@@ -26,8 +26,7 @@ Int_t Ana::Init() {
 	RootFile = new TFile(ffile.c_str(), "RECREATE", "Histogram file");
 	// define histograms
 	h_debug = new TH1D("debug", "debug", 10, 0, 10);
-
-
+        h_dR = new TH1D("jet_dR", "truth-jet distance", 500, 0, 7);
 
         // read files from data.in file and put to a vector
         string name="data.in";
