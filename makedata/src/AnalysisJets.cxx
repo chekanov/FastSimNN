@@ -61,9 +61,9 @@ Int_t Ana::AnalysisJets(vector<LParticle> JetsTrue, vector<LParticle> JetsReco) 
 		input2.push_back((float)ptT);
 		input2.push_back((float)etaT);
 		input2.push_back((float)phiT);
-                input2.push_back((float)btagT); // fraction of b-quark momenta in % (100-0) 
+                input2.push_back((float)massT); // fraction of b-quark momenta in % (100-0) 
                 input2.push_back((float)jetrT); // effective jet size 
-                input2.push_back((float)massT);
+                input2.push_back((float)btagT);
 
                 float ibb=0.0f;
 		float iout=0.0f; // no match
@@ -79,8 +79,40 @@ Int_t Ana::AnalysisJets(vector<LParticle> JetsTrue, vector<LParticle> JetsReco) 
 	}
 
 
-   if (nevv%nBatch == 0  && nevv>0) {
+   if (nevv%nBatch == 0  && nevv>1) {
                 cout << "\033[1;31m Writing data with jets \033[0m\n";
+
+                std::string s = "data/jet_pt_data"+std::to_string(batch_jet);
+                ofstream myfile;
+                myfile.open (s); // output file
+
+// create a dataset for a given bin
+                        int nn=0;
+                        for (unsigned int i=0; i<finput_jets.size(); i++){
+                                vector<float> input = finput_jets[i];
+                                vector<float> output = foutput_jets[i];
+                                float ptT=input[0];
+                                float etaT=input[1];
+                                float phiT=input[2];
+                                float massT=input[3];
+                                float jetRT=input[4];
+                         
+                                float pt=output[0];
+                                int  eff=(int)output[1];
+
+                                 for (unsigned int kk=0; kk< input.size(); kk++) myfile <<  input[kk] << " ";
+                                 myfile << "" << endl;
+                                 myfile <<  pt  << " " <<   eff  << endl;
+
+
+
+                            }
+
+                            myfile.close();
+                            finput_jets.clear();
+                            foutput_jets.clear();
+
+                            batch_jet++;
 
   }
 

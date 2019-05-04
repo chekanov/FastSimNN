@@ -67,6 +67,7 @@ class Ana  {
   // for correction
    vector<vector<float>> finput_jets;
    vector<vector<float>> foutput_jets;
+   int batch_jet;
 
    static const int nBatch=200000; // number of events in batches for training
  
