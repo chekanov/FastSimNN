@@ -47,7 +47,7 @@ class Ana  {
           int  Finish();
           int  Init();
 
-          int  AnalysisData(vector<LParticle> JetsTrue, vector<LParticle> JetsReco);
+          int  AnalysisJets(vector<LParticle> JetsTrue, vector<LParticle> JetsReco);
 
    vector <string> ntup;       // ntuple list
    int  MuPileup; // number of pileup (mu)
@@ -56,7 +56,6 @@ class Ana  {
    int   MaxEvents;            // max number of events
 
    double DeltaR;  // parameter used to match true jets with reco
-   double MSESTOP;  // when stop training..
 
    double minPT;
    double maxEta;
@@ -68,9 +67,8 @@ class Ana  {
   // for correction
    vector<vector<float>> finput_jets;
    vector<vector<float>> foutput_jets;
-   // for efficiency
-   vector<vector<float>> finput_jets_eff;
-   vector<vector<float>> foutput_jets_eff;
+
+   static const int nBatch=200000; // number of events in batches for training
  
  
 protected:

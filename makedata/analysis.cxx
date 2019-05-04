@@ -348,11 +348,13 @@ int main(int argc, char *argv[])
 				PhotonsReco.push_back(p);
 			}
 
-			// main event loop and training for all objects
-			ana.AnalysisData(JetsTrue,JetsReco);
-			ana.AnalysisData(MuonsTrue,MuonsReco);
-			ana.AnalysisData(ElectronsTrue,ElectronsReco);
-			ana.AnalysisData(PhotonsTrue,PhotonsReco);
+
+                       // main event loop and training for all objects
+                        ana.AnalysisJets(JetsTrue,JetsReco);
+                        //ana.AnalysisMuons(MuonsTrue,MuonsReco);
+                        //ana.AnalysisElectrons(ElectronsTrue,ElectronsReco);
+                        //ana.AnalysisPhotons(PhotonsTrue,PhotonsReco);
+
 			ana.nevv++;
 		}
 

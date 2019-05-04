@@ -14,7 +14,6 @@ Int_t Ana::Init() {
 	maxEta=3.0;
 	nevv=0;
 	DeltaR=0.2; // cone to match with jets
-	MSESTOP=0.0001; // error to stop training
 	MuPileup=0;
         dRbtag=0.4;      //for b-tagging (antiKT4 jets!) 
         dRisolation=0.4; // for EM isolation (as for Delphes)  
