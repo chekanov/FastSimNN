@@ -69,7 +69,7 @@ class Ana  {
    vector<vector<float>> foutput_jets;
    int batch_jet;
 
-   static const int nBatch=200000; // number of events in batches for training
+   static const int nBatch=300000; // number of events in batches for training
  
  
 protected:

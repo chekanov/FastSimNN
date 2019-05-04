@@ -90,7 +90,10 @@ Int_t Ana::AnalysisJets(vector<LParticle> JetsTrue, vector<LParticle> JetsReco) 
                 vector<float> output = foutput_jets[0];
                 myfile << finput_jets.size() <<  " " <<  input.size() << " " << output.size() << endl;
 
+                cout << "Write file=" << s << endl;
                 cout << "Total entries to write:" << finput_jets.size() << endl;
+                cout << "Nr of inputs  :" << input.size() << endl;
+                cout << "Nr of outputs :" << output.size() << endl;
 
 // create a dataset for a given bin
                         int nn=0;

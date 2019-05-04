@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
 		{
 
 			nev++;
-			if (nev%100==0 || nev<100) cout << "Event=" << nev << endl;
+			if (nev%1000==0 || nev<100) cout << "Event=" << nev << endl;
 
 		if (ana.MaxEvents !=-1 && nev>ana.MaxEvents) { stop=true; break; };
 

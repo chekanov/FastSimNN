@@ -11,11 +11,7 @@ ln -s $DELPHES delphes
 rm -f analysis 
 make -f Makefile
 
-NEVENTS=200100
-
-# /netapp/data/hepsim/events/pp/13tev/pythia8_qcd_jz/JZ7/rfast106/
-# XF="rfast106"
-# DIR=/netapp/data/hepsim/events/pp/13tev/pythia8_qcd_jz/JZ7/$XF
+NEVENTS=10000100
 
 XF="rfast008"
 echo "####  Running $XF"
@@ -24,12 +20,13 @@ rm -r out_ann_$XF
 rm -f data.in
 DIR=/netapp/data/hepsim/events/pp/14tev/mg5_ttbar_jet/$XF
 ./Make_input $DIR/
-head -n 11 data.in > a1 
+head -n 500 data.in > a1 
 DIR=/netapp/data/hepsim/events/pp/14tev/pythia8_gammajets_wgt/$XF
 ./Make_input $DIR/
-head -n 10 data.in > a2
-cat a1 a2 > data.in
-rm -f a1 a2
+head -n 500 data.in > a2
+cat a1 a2 > aa
+sort -R aa > data.in
+rm -f aa a1 a2
 echo "Run $XF"
 ./analysis $NEVENTS
 mv Analysis.root out_root/$XF.root
@@ -45,12 +42,13 @@ rm -f data.in
 # we use 21 file from HepSim
 DIR=/netapp/data/hepsim/events/pp/14tev/mg5_ttbar_jet/$XF
 ./Make_input $DIR/
-head -n 11 data.in > a1
+head -n 500 data.in > a1
 DIR=/netapp/data/hepsim/events/pp/14tev/pythia8_gammajets_wgt/$XF
 ./Make_input $DIR/
-head -n 10 data.in > a2
-cat a1 a2 > data.in
-rm -f a1 a2
+head -n 500 data.in > a2
+cat -R a1 a2 > aa
+sort aa > data.in 
+rm -f aa a1 a2
 echo "Run $XF"
 ./analysis $NEVENTS
 mv Analysis.root out_root/$XF.root
