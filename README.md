@@ -7,6 +7,17 @@ It uses an array of neural networks that need to be trained beforehand using tru
 detector-level records.
 
 
+This is is how it is orginized:
+
+
+* builder  - read Delphes files from HepSim and train NN
+* validate - validate NN  
+* compare  - compare performance by reconstracting resolutions
+* toy_detector - create fake data and run ANN 
+* makedata - create txt files from Delphes for NN training
+
+
+
 # Now to run
 The program is designed and compiled to run on the ANL ATLAS cluster.
 You need to link it against Delphes. 

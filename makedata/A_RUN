@@ -11,7 +11,7 @@ ln -s $DELPHES delphes
 rm -f analysis 
 make -f Makefile
 
-NEVENTS=10000100
+NEVENTS=15000100
 
 XF="rfast008"
 echo "####  Running $XF"
@@ -46,8 +46,8 @@ head -n 500 data.in > a1
 DIR=/netapp/data/hepsim/events/pp/14tev/pythia8_gammajets_wgt/$XF
 ./Make_input $DIR/
 head -n 500 data.in > a2
-cat -R a1 a2 > aa
-sort aa > data.in 
+cat a1 a2 > aa
+sort -R aa > data.in 
 rm -f aa a1 a2
 echo "Run $XF"
 ./analysis $NEVENTS

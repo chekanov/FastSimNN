@@ -59,6 +59,12 @@ int main(int argc, char **argv)
 	const double nnToFreq=1000000;
 	cout << "NN to freq. conversion " << nnToFreq << " slices" << endl;
 
+        const double desired_error = (const float) 0.005;
+        const unsigned int max_epochs = 200;
+        const unsigned int epochs_between_reports = 10;
+        cout << "Max number of epoch " << max_epochs  <<  endl;
+
+
 	if (argc != 2) {
 		cerr << " Unexpected number of command-line arguments. \n Set: train or run"
 		<< " Program stopped! " << endl;
@@ -69,7 +75,7 @@ int main(int argc, char **argv)
 	rtype = argv[1];
 
 	// before doing anything, read train data and shuffle
-	const char* trainFile="data/train1.data";
+	const char* trainFile="data/train.data";
 	cout << "Read file: " << trainFile << endl;
 
 	std::vector<int> ints;
@@ -134,9 +140,6 @@ int main(int argc, char **argv)
 	// number in hidden layer 2
 	const unsigned int num_neurons_hidden_2=(int)(inNodes/4.0);
 
-	const double desired_error = (const float) 0.005;
-	const unsigned int max_epochs = 40;
-	const unsigned int epochs_between_reports = 10;
 	// NN name
 	const char* nn_name="nn_out/neural_final.net";
 
@@ -392,7 +395,7 @@ int main(int argc, char **argv)
 
 		cout << endl << "Testing network: open " << nn_name << endl;
 		struct fann *ann_new = fann_create_from_file(nn_name);
-		const char* testFile="data/test1.data";
+		const char* testFile="data/test.data";
 		// this is for debuging inputs
 		//const char* testFile="data/train1.data";
 		cout << "Read test: " << testFile << endl;
@@ -411,6 +414,8 @@ int main(int argc, char **argv)
 		fann_type** output = data->output;
 
 		for (int ev=0; ev<totalEvents; ev++){
+
+                        if (ev%10000==0) cout << "event=" << ev << endl;
 
 			// write original
 			for (unsigned int kk=0; kk< data->num_input; kk++) myfile <<  input[ev][kk] << " ";

@@ -3,12 +3,12 @@
 # apply cut on 2nd input
 # this is a cut on 2nd input variable which changes betwenn -pi and pi
 # The spread of 1st variable significantly depends on 2nd variable
-Cut1=0
+Cut1=-999
 
 # apply cut on 3rd input
 # this is a cut on 2nd input variable which changes betwenn -pi and pi
 # The spread of 1st variable significantly depends on 2nd variable
-Cut2=-9999
+Cut2=-999
 
 
 from ROOT import gROOT,gPad,gStyle,TCanvas,TSpline3,TFile,TLine,TLatex,TAxis,TLegend,TPostScript
@@ -93,12 +93,21 @@ gPad.SetBottomMargin(0.1)
 gPad.SetLeftMargin(0.1)
 gPad.SetRightMargin(0.05)
 
-data1_in,data1_out=getData("data/test1.data")
+data1_in,data1_out=getData("data/test.data")
 data2_in,data2_out=getData("data/neuralnet.data")
 
 xmin=-4000-1 
 xmax=4000-1 
 bins=100
+# loop over all events
+print "Calculate histogram ranges"
+data=[]
+for i in xrange(len(data1_in)):
+          inputs1=data1_in[i]
+          data.append(inputs1[0])
+xmin=min(data)
+xmax=min(data)
+
 
 h1=TH1D("valid","valid", bins, xmin,xmax)
 h1.Sumw2()
@@ -123,6 +132,7 @@ eff1=0
 eff2=0
 nn1=0
 nn2=0
+
 
 # loop over all events
 for i in xrange(len(data1_in)):
