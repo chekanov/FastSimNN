@@ -48,6 +48,7 @@ class Ana  {
           int  Init();
 
           int  AnalysisJets(vector<LParticle> JetsTrue, vector<LParticle> JetsReco);
+          int  AnalysisElectrons(vector<LParticle> ElectronsTrue, vector<LParticle> ElectronsReco);
 
    vector <string> ntup;       // ntuple list
    int  MuPileup; // number of pileup (mu)
@@ -67,10 +68,20 @@ class Ana  {
   // for correction
    vector<vector<float>> finput_jets;
    vector<vector<float>> foutput_jets;
-   int batch_jet;
+
+  // for muons 
+   vector<vector<float>> finput_muons;
+   vector<vector<float>> foutput_muons;
+
+   vector<vector<float>> finput_electrons;
+   vector<vector<float>> foutput_electrons;
+
+   vector<vector<float>> finput_photons;
+   vector<vector<float>> foutput_photons;
 
    static const int nBatch=250000; // number of events in batches for training
- 
+   int batch_jet;
+   int batch_ele; 
  
 protected:
 

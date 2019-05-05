@@ -353,7 +353,7 @@ int main(int argc, char *argv[])
                        // main event loop and training for all objects
                         ana.AnalysisJets(JetsTrue,JetsReco);
                         //ana.AnalysisMuons(MuonsTrue,MuonsReco);
-                        //ana.AnalysisElectrons(ElectronsTrue,ElectronsReco);
+                        ana.AnalysisElectrons(ElectronsTrue,ElectronsReco);
                         //ana.AnalysisPhotons(PhotonsTrue,PhotonsReco);
 
 			ana.nevv++;

@@ -19,7 +19,7 @@ Int_t Ana::Init() {
         dRisolation=0.4; // for EM isolation (as for Delphes)  
         btag_frac=0.2;   // fraction of b-quark
         batch_jet=0;
-
+        batch_ele=0;
 
 	ffile="Analysis.root";
 	cout << "\n -> Output file is =" << ffile << endl;
