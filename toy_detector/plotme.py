@@ -3,7 +3,7 @@
 # apply cut on 2nd input
 # this is a cut on 2nd input variable which changes betwenn -pi and pi
 # The spread of 1st variable significantly depends on 2nd variable
-Cut1=-999
+Cut1=2
 
 # apply cut on 3rd input
 # this is a cut on 2nd input variable which changes betwenn -pi and pi
@@ -11,29 +11,27 @@ Cut1=-999
 Cut2=-999
 
 
+
 from ROOT import gROOT,gPad,gStyle,TCanvas,TSpline3,TFile,TLine,TLatex,TAxis,TLegend,TPostScript
 from ROOT import TArrow,TCut,TPad,TH1D,TF1,TObject,TPaveText,TGraph,TGraphErrors,TGraphAsymmErrors
 from ROOT import gSystem,gDirectory
-import math
-import ROOT
-import sys
-#sys.path.append("nnet/")
-#import bpnn
+import ROOT,sys,math
+sys.path.append("modules/")
+from AtlasUtils import *
 
-print ('Number of arguments:', len(sys.argv), 'arguments.') 
+print ('Number of arguments:', len(sys.argv), 'arguments.')
 print ('Argument List:', str(sys.argv))
-print ('Use as: script.py -b 0 (or 1,2)') 
+print ('Use as: script.py -b 0 (or 1,2)')
 myinput="interactive"
 if (len(sys.argv) ==2):
    myinput = sys.argv[1]
-print ("Mode=",myinput) 
+print ("Mode=",myinput)
 
 
-out=[0]
+
 gROOT.Reset()
 figdir="figs/"
 epsfig=figdir+__file__.replace(".py",".eps")
-
 
 
 def getData(inputf):
@@ -99,15 +97,19 @@ data2_in,data2_out=getData("data/neuralnet.data")
 xmin=-4000-1 
 xmax=4000-1 
 bins=100
-# loop over all events
 print "Calculate histogram ranges"
 data=[]
 for i in xrange(len(data1_in)):
           inputs1=data1_in[i]
-          data.append(inputs1[0])
+          output1=data1_out[i]
+          #if (abs(inputs1[0])>1000): print i, inputs1[0] 
+          if (inputs1[0] != 0): 
+                 data.append(output1[0]/inputs1[0])
 xmin=min(data)
-xmax=min(data)
-
+xmax=max(data)
+print "Min value =",xmin," Max value=",xmax
+xmin=-1.0 
+xmax=1.0 
 
 h1=TH1D("valid","valid", bins, xmin,xmax)
 h1.Sumw2()
@@ -152,18 +154,18 @@ for i in xrange(len(data1_in)):
 
           # set a cut on one variable
           if (inputs1[1]>Cut1 and inputs1[2]>Cut2): 
-             if ( output1[1]>0): h1.Fill(  output1[0]  )
+             if ( output1[1]>0): h1.Fill(  output1[0]/inputs1[0]  )
 
           # set a cut on one variable
           if (inputs2[1]>Cut1 and inputs2[2]>Cut2):
-             if ( output2[1]>0): h2.Fill(  output2[0]  )
+             if ( output2[1]>0): h2.Fill(  output2[0]/inputs2[0]  )
 
 
 h1.Scale(1.0/h1.Integral())
 h2.Scale(1.0/h2.Integral())
 
 ax=h1.GetXaxis(); ax.SetTitleOffset(0.8)
-ax.SetTitle( "rec-true" );
+ax.SetTitle( "(rec-true) / true" );
 ay=h1.GetYaxis(); ay.SetTitleOffset(0.8)
 ay.SetTitle( "events" );
 ax.SetTitleOffset(1.1); ay.SetTitleOffset(1.4)

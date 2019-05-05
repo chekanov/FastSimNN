@@ -501,7 +501,6 @@ int main(int argc, char **argv)
 		}
 
 
-
 		cout << "\n#### Predicted Rec-true distribution:" << endl;
 		double mean_1=out1res->GetMean();
 		double rms_1=out1res->GetRMS();

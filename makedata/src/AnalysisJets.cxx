@@ -41,40 +41,52 @@ Int_t Ana::AnalysisJets(vector<LParticle> JetsTrue, vector<LParticle> JetsReco) 
                 float pt=0;
                 float eta=0;  
                 float mass=0; 
-                 float jetr=0;
+                float jetr=0;
 		if (indexMatch>-1){
 			LParticle rjet = (LParticle)JetsReco.at(indexMatch);
 			TLorentzVector L1 = rjet.GetP();
 			phi = L1.Phi();
 			pt  = L1.Perp();
 			eta = L1.PseudoRapidity();
-			float mass  = L1.M();
+			mass  = L1.M();
                         btag  = (float)rjet.GetType();
                         jetr=(float)(rjet.GetCharge()/10000.0); // get jet radius 
                         jetE=L1.E(); // energy 
                         jetr=jetr/sqrt(jetE);
 		}
 
-		// statistics limitted for efficiency. No matching 
-		vector<float> input2;
-		vector<float> output2;
-		input2.push_back((float)ptT);
-		input2.push_back((float)etaT);
-		input2.push_back((float)phiT);
-                input2.push_back((float)massT); // fraction of b-quark momenta in % (100-0) 
-                input2.push_back((float)jetrT); // effective jet size 
-                input2.push_back((float)btagT);
 
-                float ibb=0.0f;
-		float iout=0.0f; // no match
-		if (indexMatch>-1)  iout=1.0f;
+                float ibb=0;
+                float iout=0; // no match
+                if (indexMatch>-1)  iout=1.0f;
                 if (btag>0)         ibb=1.0f;  // b-tagged and matched
 
-                output2.push_back(pt); 
-                output2.push_back(iout);
 
-		finput_jets.push_back(input2);
-		foutput_jets.push_back(output2);
+               // protect against large fluctuations
+               bool forget=false;
+               float dpt= (pt-ptT);
+               float ratio=dpt/ptT;
+               if (iout>0 && abs(ratio) > 0.8) forget=true; 
+               if (iout==0) dpt=0;
+
+               if (forget==false) {
+		  vector<float> input2;
+		  vector<float> output2;
+		  input2.push_back((float)ptT);
+		  input2.push_back((float)etaT);
+		  input2.push_back((float)phiT);
+                  input2.push_back((float)massT); // fraction of b-quark momenta in % (100-0) 
+                  input2.push_back((float)jetrT); // effective jet size 
+                  input2.push_back((float)btagT);
+
+                  // output
+                  output2.push_back(dpt);  // difference reco-true 
+                  output2.push_back(iout); // efficiency (0 or 1) 
+
+		  finput_jets.push_back(input2);
+		  foutput_jets.push_back(output2);
+                } // forget
+
 
 	}
 
@@ -95,7 +107,6 @@ Int_t Ana::AnalysisJets(vector<LParticle> JetsTrue, vector<LParticle> JetsReco) 
                 cout << "Nr of inputs  :" << input.size() << endl;
                 cout << "Nr of outputs :" << output.size() << endl;
 
-// create a dataset for a given bin
                         int nn=0;
                         for (unsigned int i=0; i<finput_jets.size(); i++){
                                 vector<float> input = finput_jets[i];
@@ -106,13 +117,12 @@ Int_t Ana::AnalysisJets(vector<LParticle> JetsTrue, vector<LParticle> JetsReco) 
                                 float massT=input[3];
                                 float jetRT=input[4];
                          
-                                float pt=output[0];
-                                int  eff=(int)output[1];
+                                float dpt=output[0];
+                                int   eff=(int)output[1];
 
                                  for (unsigned int kk=0; kk< input.size(); kk++) myfile <<  input[kk] << " ";
                                  myfile << "" << endl;
-                                 myfile <<  (pt-ptT)  << " " <<   eff  << endl;
-
+                                 myfile <<  dpt  << " " <<   eff  << endl;
                             }
 
                             myfile.close();
