@@ -1,0 +1,28 @@
+#!/bin/bash
+# S.Chekanov (ANL)
+
+source ./setup.sh
+
+PWD=`pwd`
+
+rm -f ./data/train.data ./data/test.data
+
+# use fake data
+#cd data
+#ln -s ../../makedata/train1.data train.data; ln -s ../../makedata/data/test1.data  $PWD/data/test.data
+#cd ..
+
+# use real Delphes
+cd data
+ln -s ../../makedata/out_ann_rfast007/jet_pt_v0.d train.data; 
+ln -s ../../makedata/out_ann_rfast007/jet_pt_v1.d test.data
+cd ..
+
+
+# train NN using train1.data sample 
+./ana train 
+
+sleep 1
+
+# validation and create prediction
+./ana run
