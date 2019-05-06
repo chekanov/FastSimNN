@@ -1,19 +1,24 @@
 # Plot validation and NN data after some cut on 2,3,4 variable
 
 
-Cut=100 # cut on pT
+Cut=500 # cut on pT
 
 
-# apply cut on 2nd input (eta) 
+# apply cut on 2nd input
 # this is a cut on 2nd input variable which changes betwenn -pi and pi
 # The spread of 1st variable significantly depends on 2nd variable
-Cut1=2
+Cut1=2 # cut on eta 
 
 # apply cut on 3rd input
 # this is a cut on 2nd input variable which changes betwenn -pi and pi
 # The spread of 1st variable significantly depends on 2nd variable
 Cut2=-999
 
+
+Ymin=0.0
+Ymax=0.5
+Xmin=20
+Xmax=3500
 
 
 from ROOT import gROOT,gPad,gStyle,TCanvas,TSpline3,TFile,TLine,TLatex,TAxis,TLegend,TPostScript
@@ -22,6 +27,8 @@ from ROOT import gSystem,gDirectory
 import ROOT,sys,math
 sys.path.append("modules/")
 from AtlasUtils import *
+from global_module import *
+
 
 print ('Number of arguments:', len(sys.argv), 'arguments.')
 print ('Argument List:', str(sys.argv))
@@ -58,7 +65,7 @@ def getData(inputf):
             if (inputs==len(pars)): data_in.append(pars);
             if (outputs==len(pars)): data_out.append(pars);
        kk=kk+1
-       if (kk%100000==0): print "Process=",kk
+       if (kk%100000==0): print "Read data=",kk
 
    print "events=",events
    print "inputs=",inputs
@@ -68,10 +75,11 @@ def getData(inputf):
 
 nameX=""
 nameY=""
+
 Ymin=0.0
-Ymax=500000
-Xmin=0
-Xmax=6.0 
+Ymax=0.5
+Xmin=20
+Xmax=3500
 
 
 NN=0
@@ -91,8 +99,8 @@ c1.SetGrid();
 c1.cd(1);
 gPad.SetLogy(0)
 gPad.SetTopMargin(0.05)
-gPad.SetBottomMargin(0.1)
-gPad.SetLeftMargin(0.1)
+gPad.SetBottomMargin(0.14)
+gPad.SetLeftMargin(0.15)
 gPad.SetRightMargin(0.05)
 
 data1_in,data1_out=getData("data/test.data")
@@ -115,44 +123,27 @@ print "Min value =",xmin," Max value=",xmax
 xmin=-0.5
 xmax=0.5
 
-h1=TH1D("valid","valid", bins, xmin,xmax)
-h1.Sumw2()
-h1.SetLineWidth(2)
-h1.SetLineStyle(1)
-h1.SetLineColor(1);
-h1.SetStats(0)
-h1.SetTitle("")
+PtMin=25
+ptBins = (PtMin,40,60,80,100,140,180, 210, 240, 290, 340, 400, 500, 800, 1000, 1500,  2000, 2500)
 
-h2=TH1D("neuralnet","neuralnet", bins, xmin,xmax)
-h2.Sumw2()
-h2.SetMarkerColor(2)
-h2.SetMarkerSize(0.7)
-h2.SetMarkerStyle(21)
-h2.SetLineWidth(2)
-h2.SetLineStyle(1)
-h2.SetLineColor(1);
-h2.SetStats(0)
-h2.SetTitle("")
-
-
-h1b=TH1D("valid","valid", bins, xmin,xmax)
-h1b.Sumw2()
-h1b.SetLineWidth(2)
-h1b.SetLineStyle(1)
-h1b.SetLineColor(4);
-h1b.SetStats(0)
-h1b.SetTitle("")
-
-h2b=TH1D("neuralnet","neuralnet", bins, xmin,xmax)
-h2b.Sumw2()
-h2b.SetMarkerColor(4)
-h2b.SetMarkerSize(0.7)
-h2b.SetMarkerStyle(22)
-h2b.SetLineWidth(2)
-h2b.SetLineStyle(1)
-h2b.SetLineColor(1);
-h2b.SetStats(0)
-h2b.SetTitle("")
+histosT=[]
+histosN=[]
+xrangesT=[]
+xrangesN=[]
+for i in range(len(ptBins)):
+        h1=TH1D("test"+str(i),"test"+str(i), bins, xmin,xmax)
+        h1.Sumw2()
+        h1.SetTitle("")
+        h2=TH1D("nn"+str(i),"nn"+str(i), bins, xmin,xmax)
+        h2.Sumw2()
+        h2.SetTitle("")
+        histosT.append(h1)
+        histosN.append(h2)
+        # keep mean value
+        h3=TH1D("xrangeT"+str(i),"xrangeT"+str(i), 1000, 0,4000)
+        xrangesT.append(h3)
+        h3=TH1D("xrangeN"+str(i),"xrangeN"+str(i), 1000, 0,4000)
+        xrangesN.append(h3)
 
 
 eff1=0
@@ -175,60 +166,66 @@ for i in xrange(len(data1_in)):
           eff1=eff1+output1[1]
           eff2=eff2+output1[1]
           nn1=nn1+1.0 
-          nn2=nn2+1.0
-          if ( output1[1]>0 and inputs1[0]>Cut and abs(inputs1[1])<Cut1): h1.Fill(  output1[0]/inputs1[0]  )
-          if ( output2[1]>0 and inputs2[0]>Cut and abs(inputs2[1])<Cut1): h2.Fill(  output2[0]/inputs2[0]  )
-          if ( output1[1]>0 and inputs1[0]>Cut and abs(inputs1[1])>Cut1): h1b.Fill(  output1[0]/inputs1[0]  )
-          if ( output2[1]>0 and inputs2[0]>Cut and abs(inputs2[1])>Cut1): h2b.Fill(  output2[0]/inputs2[0]  )
+          nn2=nn2+1.0 
+
+          if (i%100000==0): print "calculate=",i  
+          pT=inputs1[0]
+          eta=abs(inputs1[1]) 
+          if (eta<Cut1): 
+           for m in range(len(ptBins)-1):
+                if (pT>ptBins[m] and pT<ptBins[m+1]):
+                   if ( output1[1]>0): # non-zero efficiency 
+                                      h1=histosT[m]
+                                      h1.Fill(  output1[0]/inputs1[0]  )
+                                      xrangesT[m].Fill(pT)
+
+          pT=inputs2[0]
+          eta=abs(inputs2[1])
+          if (eta<Cut1):
+            for m in range(len(ptBins)-1):
+                if (pT>ptBins[m] and pT<ptBins[m+1]):
+                   if ( output2[1]>0): # non-zero efficiency 
+                                      h1=histosN[m]
+                                      h1.Fill(  output2[0]/inputs2[0]  )
+                                      xrangesN[m].Fill(pT)
 
 
-#h1.Scale(1.0/h1.Integral())
-#h2.Scale(1.0/h2.Integral())
+h=gPad.DrawFrame(Xmin,Ymin,Xmax,Ymax)
+gPad.SetLogy(0)
+gPad.SetLogx(1)
+ax=h.GetXaxis(); ax.SetTitleOffset(1.0)
+ax.SetTitle( "p_{T}^{jet} [GeV]"  );
+ay=h.GetYaxis();
+ay.SetTitle( "#sigma (p_{T}^{jet}) / p_{T}^{jet}" );
+ay.SetTitleSize(0.05);
+ax.SetTitleSize(0.05);
+ay.SetLabelSize(0.04)
+ax.SetTitleOffset(1.1);
+ay.SetTitleOffset(1.25)
+ay.SetLabelFont(42)
+ax.SetLabelFont(42)
+ax.SetLabelSize(0.04)
 
-ax=h1.GetXaxis(); ax.SetTitleOffset(0.8)
-ax.SetTitle( "(rec-true) / true" );
-ay=h1.GetYaxis(); ay.SetTitleOffset(0.8)
-ay.SetTitle( "events" );
-ax.SetTitleOffset(1.1); ay.SetTitleOffset(1.4)
-ax.Draw("same")
-ay.Draw("same")
+g1=getResponseGraph(histosT, xrangesT)
+g2=getResponseGraph(histosN, xrangesN)
+g2.SetMarkerColor( 2 )
+g2.SetMarkerStyle( 24 )
 
-h1.Draw("histo")
-h2.Draw("pe same") 
+g1.Draw("pe same")
+g2.Draw("pe same")
 
-h1b.Draw("same histo")
-h2b.Draw("pe same")
-
-leg2=TLegend(0.12, 0.7, 0.5, 0.92);
+leg2=TLegend(0.5, 0.7, 0.85, 0.91);
 leg2.SetBorderSize(0);
+leg2.SetTextFont(62);
 leg2.SetFillColor(10);
-leg2.SetTextSize(0.034);
-leg2.SetHeader("|#eta(jet)|<"+str(Cut1)+":")
-leg2.AddEntry(h1,"Delphes","bl")
-leg2.AddEntry(h1,"p="+"{0:.3f}".format(h1.GetMean())+ " rms="+"{0:.2f}".format(rms90(h1)),"")
-leg2.AddEntry(h2,"NN","pl")
-leg2.AddEntry(h2,"p="+"{0:.3f}".format(h2.GetMean())+ " rms="+"{0:.2f}".format(rms90(h2)),"")
-
-leg3=TLegend(0.12, 0.5, 0.5, 0.65);
-leg3.SetBorderSize(0);
-leg3.SetFillColor(10);
-leg3.SetTextSize(0.034);
-leg3.SetHeader("|#eta|>"+str(Cut1)+":")
-leg3.AddEntry(h1b,"Delphes","bl")
-leg3.AddEntry(h1b,"p="+"{0:.3f}".format(h1b.GetMean())+ " rms="+"{0:.2f}".format(rms90(h1b)),"")
-leg3.AddEntry(h2b,"NN","pl")
-leg3.AddEntry(h2b,"p="+"{0:.3f}".format(h2b.GetMean())+ " rms="+"{0:.2f}".format(rms90(h2b)),"")
-
-
+leg2.SetTextSize(0.04);
+leg2.AddEntry(g1,dlab, "pl")
+leg2.AddEntry(g2,nnlab, "pl")
 leg2.Draw("same");
-leg3.Draw("same");
 
-print "Cut on 2nd input=", Cut1
-print "True:  mean=",h1.GetMean()," RMS=",h1.GetRMS()," entries=",h1.GetEntries() 
-print "NN  :  mean=",h2.GetMean()," RMS=",h2.GetRMS()," entries=",h2.GetEntries()
+myText( 0.2,0.84,4,0.04,"antiKT R=0.4 jets")
+myText( 0.2,0.9,2,0.05,"|#eta(jet)|<"+str(Cut1))
 
-print "Efficiency True=",eff1/nn1
-print "Efficiency NN=",eff2/nn2
 
 print epsfig
 gPad.RedrawAxis()
