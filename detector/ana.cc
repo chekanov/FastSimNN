@@ -102,10 +102,10 @@ int main(int argc, char **argv)
 	cout << "Shuffle: " << trainFile << endl;
 	fann_shuffle_train_data(dataTrain);
 
-
         const char* validFile="data/valid.data";
         cout << "Read cross validation sample : " << validFile << endl;
         struct fann_train_data *dataValid = fann_read_train_from_file( validFile );
+        cout << "Shuffle: " << validFile << endl;
         fann_shuffle_train_data(dataValid);
 
 
@@ -209,16 +209,7 @@ int main(int argc, char **argv)
 		fann_type** input = dataTrain->input;
 		fann_type** output = dataTrain->output;
 
-
-                // rebuild validation data
-                // empty data
-                fann_train_data *  dataset1V=  fann_create_train(dataValid-> num_data, num_input, num_output);
-                fann_type** inputV = dataValid->input;
-                fann_type** outputV = dataValid->output;
-
-
 		for (int ev=0; ev<totalEvents; ev++){
-
 			// slice output (1st variable only)
 			float Slice[maxSlice-1];
 			float v1=output[ev][0]; // this one is difference rec-true
@@ -231,7 +222,6 @@ int main(int argc, char **argv)
 				else Slice[jjj]=0;
 				if (v2==0) Slice[jjj]=0; // 0 if did not pass efficiency
 			}
-
 			// slice all input variables
 			float InSlice[numInput][maxInSlice-1];
 			for (int jj=0; jj<numInput; jj++) {
@@ -271,14 +261,19 @@ int main(int argc, char **argv)
 		}
 
 
+                // rebuild validation data
+                // empty data
+                fann_train_data *  dataset1V=  fann_create_train(dataValid->num_data, num_input, num_output);
+                fann_type** inputV = dataValid->input;
+                fann_type** outputV = dataValid->output;
 
 
                // now rebuild  validation data set similarly..
-                for (unsigned int ev=0; ev<dataValid-> num_data; ev++){
+                for (unsigned int ev=0; ev<dataValid->num_data; ev++){
                         // slice output (1st variable only)
                         float Slice[maxSlice-1];
-                        float v1=output[ev][0]; // this one is difference rec-true
-                        float v2=output[ev][1]; // this is efficiency 0 or 1
+                        float v1=outputV[ev][0]; // this one is difference rec-true
+                        float v2=outputV[ev][1]; // this is efficiency 0 or 1
                         for (int jjj=0; jjj<maxSlice-1; jjj++) {
                                 float d1=Xmin+jjj* del;
                                 float d2=d1+del;
@@ -289,7 +284,7 @@ int main(int argc, char **argv)
                         // slice all input variables
                         float InSlice[numInput][maxInSlice-1];
                         for (int jj=0; jj<numInput; jj++) {
-                                float vv=input[ev][jj];
+                                float vv=inputV[ev][jj];
                                 float XM=cminIN[jj];
                                 float del2=(cmaxIN[jj] - cminIN[jj]) / (maxInSlice-1);
                                 for (int jjj=0; jjj<maxInSlice-1; jjj++) {
@@ -305,7 +300,7 @@ int main(int argc, char **argv)
                         // efficiency value is unchanged
                         dataset1V->output[ev][maxSlice-1] =v2;
                         // prepare new input using grid
-                        for (int kk=0; kk<numInput; kk++)  dataset1V->input[ev][kk]=(input[ev][kk]-cminIN[kk])/(cmaxIN[kk]-cminIN[kk]); // 4 original (rescaled) values
+                        for (int kk=0; kk<numInput; kk++)  dataset1V->input[ev][kk]=(inputV[ev][kk]-cminIN[kk])/(cmaxIN[kk]-cminIN[kk]); // 4 original (rescaled) values
                         int kstart=numInput;
                         for (int jj=0; jj<numInput; jj++) {
                                 for (int kk=0; kk<maxInSlice-1; kk++)  {
