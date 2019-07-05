@@ -5,17 +5,29 @@ source ./setup.sh
 
 PWD=`pwd`
 
-rm -f ./data/train.data ./data/test.data
+echo "Clean data.." 
+rm -f ./data/train.data ./data/test.data ./data/valid.data 
 
 # use fake data
 #cd data
 #ln -s ../../makedata/train1.data train.data; ln -s ../../makedata/data/test1.data  $PWD/data/test.data
 #cd ..
 
+#rfast007 - pileups <mu>=40
+#rfast006 - pileups <mu>=120
+#rfast008 - pileups <mu>=0 ATLAS default card
+
 # use real Delphes
+XDIR="../../makedata/out_ann_rfast008" 
 cd data
-ln -s ../../makedata/out_ann_rfast007/jet_pt_v0.d train.data; 
-ln -s ../../makedata/out_ann_rfast007/jet_pt_v1.d test.data
+cp ../merger_data.py .
+chmod 755 *
+python2 merger_data.py ./train.data $XDIR/jet_pt_v0.d $XDIR/jet_pt_v3.d $XDIR/jet_pt_v4.d 
+python2 merger_data.py ./test.data  $XDIR/jet_pt_v1.d $XDIR/jet_pt_v2.d 
+python2 merger_data.py ./valid.data $XDIR/jet_pt_v5.d $XDIR/jet_pt_v6.d 
+# this is a fast checking..
+#ln -s ../../makedata/out_ann_rfast007/jet_pt_v0.d train.data; 
+#ln -s ../../makedata/out_ann_rfast007/jet_pt_v1.d test.data
 cd ..
 
 

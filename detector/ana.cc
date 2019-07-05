@@ -50,9 +50,10 @@ int main(int argc, char **argv)
 
 	const bool debug=false;
 
-	// how many slices assume 200 slices
-	const int maxSlice=100;
+	// how many slices assume slices to divide the phase space for each output 
+	const int maxSlice=120;
 	cout << "\n\nStart calculations with " << maxSlice << " output slices" << endl;
+        // how many slices for input variables 
 	const int maxInSlice=20;
 	cout << "Start calculations with " << maxInSlice << " input slices" << endl;
 
@@ -60,7 +61,7 @@ int main(int argc, char **argv)
 	cout << "NN to freq. conversion " << nnToFreq << " slices" << endl;
 
         const double desired_error = (const float) 0.005;
-        const unsigned int max_epochs = 200;
+        const unsigned int max_epochs = 300;
         const unsigned int epochs_between_reports = 10;
         cout << "Max number of epoch " << max_epochs  <<  endl;
 
@@ -99,7 +100,14 @@ int main(int argc, char **argv)
 	// read data for training..
 	struct fann_train_data * dataTrain = fann_read_train_from_file(trainFile);
 	cout << "Shuffle: " << trainFile << endl;
-	// fann_shuffle_train_data(dataTrain);
+	fann_shuffle_train_data(dataTrain);
+
+
+        const char* validFile="data/valid.data";
+        cout << "Read cross validation sample : " << validFile << endl;
+        struct fann_train_data *dataValid = fann_read_train_from_file( validFile );
+        fann_shuffle_train_data(dataValid);
+
 
 	cout << "calculate min and max for differences" << endl;
 	double cmin = 1e10;  double cmax = -1e10;
@@ -201,6 +209,14 @@ int main(int argc, char **argv)
 		fann_type** input = dataTrain->input;
 		fann_type** output = dataTrain->output;
 
+
+                // rebuild validation data
+                // empty data
+                fann_train_data *  dataset1V=  fann_create_train(dataValid-> num_data, num_input, num_output);
+                fann_type** inputV = dataValid->input;
+                fann_type** outputV = dataValid->output;
+
+
 		for (int ev=0; ev<totalEvents; ev++){
 
 			// slice output (1st variable only)
@@ -254,6 +270,56 @@ int main(int argc, char **argv)
 			}
 		}
 
+
+
+
+               // now rebuild  validation data set similarly..
+                for (unsigned int ev=0; ev<dataValid-> num_data; ev++){
+                        // slice output (1st variable only)
+                        float Slice[maxSlice-1];
+                        float v1=output[ev][0]; // this one is difference rec-true
+                        float v2=output[ev][1]; // this is efficiency 0 or 1
+                        for (int jjj=0; jjj<maxSlice-1; jjj++) {
+                                float d1=Xmin+jjj* del;
+                                float d2=d1+del;
+                                if (v1>d1  && v1<=d2) Slice[jjj]=1.0f;
+                                else Slice[jjj]=0;
+                                if (v2==0) Slice[jjj]=0; // 0 if did not pass efficiency
+                        }
+                        // slice all input variables
+                        float InSlice[numInput][maxInSlice-1];
+                        for (int jj=0; jj<numInput; jj++) {
+                                float vv=input[ev][jj];
+                                float XM=cminIN[jj];
+                                float del2=(cmaxIN[jj] - cminIN[jj]) / (maxInSlice-1);
+                                for (int jjj=0; jjj<maxInSlice-1; jjj++) {
+                                        float d1=XM+jjj* del2;
+                                        float d2=d1+del2;
+                                        if (vv>d1  && vv<=d2) InSlice[jj][jjj]=1.0f;
+                                        else InSlice[jj][jjj]=0;
+                                }
+                        }
+
+                        // prepare new output for NN (resolution)
+                        for (int kk=0; kk<maxSlice-1; kk++)  dataset1V->output[ev][kk] =Slice[kk];
+                        // efficiency value is unchanged
+                        dataset1V->output[ev][maxSlice-1] =v2;
+                        // prepare new input using grid
+                        for (int kk=0; kk<numInput; kk++)  dataset1V->input[ev][kk]=(input[ev][kk]-cminIN[kk])/(cmaxIN[kk]-cminIN[kk]); // 4 original (rescaled) values
+                        int kstart=numInput;
+                        for (int jj=0; jj<numInput; jj++) {
+                                for (int kk=0; kk<maxInSlice-1; kk++)  {
+                                        dataset1V->input[ev][kstart] =InSlice[jj][kk];
+                                        kstart=kstart+1;
+                                }
+                        }
+
+                } // end rebuilding input validation sample 
+
+
+
+
+
 		cerr << "  input layer:      " << num_input << " units" << endl;
 		cerr << "  hidden layer 1:   " << num_neurons_hidden_1 << "  units" << endl;
 		//cerr << "  hidden layer 2:   " << num_neurons_hidden_2 << "  units" << endl;
@@ -290,7 +356,7 @@ int main(int argc, char **argv)
 		cout << "Total number of connections=" << fann_get_total_connections(ann) << endl;
 		cout << "-> Training using " << num_threads << " threads" << endl;
 
-		cout << "Write output.d: p efficiency purity " << endl;
+		cout << "Write file with MSE errors" << endl;
 		std::ofstream out_error("nn_out/training_mse.d");
 		out_error << "# epoch  training-MSE validation-MSE" << endl;
 
@@ -308,20 +374,27 @@ int main(int argc, char **argv)
 		double train_error=100000;
 		for(unsigned int i = 1 ; i <= max_epochs ; i++) {
 			//fann_train_epoch(ann, dataTrain);
-
 			// parallel
-			train_error = num_threads > 1 ? fann_train_epoch_irpropm_parallel(ann, dataset1, num_threads) : fann_train_epoch(ann, dataset1);
 
+			train_error = num_threads > 1 ? fann_train_epoch_irpropm_parallel(ann, dataset1, num_threads) : fann_train_epoch(ann, dataset1);
 
 			double delta=last_val_error-train_error;
 			if (i%epochs_between_reports==0 || i<epochs_between_reports) {
 				train_error = fann_test_data(ann, dataset1);
-				// val_error = fann_test_data(ann, dataTrainVal);
-				cout << "# epoch=" << i << " MSE=" << train_error << " Delta=" << delta << endl;
-				// out_error << i << " " << train_error << " " << val_error << endl;
-			}
+				val_error = fann_test_data(ann, dataset1V);
+                                cout << "# epoch=" << i << " train MSE=" << train_error << " validation MSE=" << val_error <<  endl;
+			
+                                if (train_error<desired_error) {
+                                cout << " Have reached the designed error=" << desired_error << endl;
+                                break;
+                                }
+                                if (train_error>val_error+0.001) {
+                                cout << " Training has " << train_error<< " This is above the validation error=" << val_error << "\n Stop! " << endl;
+                                break;
+                                }
+                                out_error << i << " " << train_error << " " << val_error << endl;
+                        }
 
-			if (train_error<desired_error) break;
 
 			if (i%50==0) {
 				last_val_errors.push_back(val_error);
@@ -337,8 +410,8 @@ int main(int argc, char **argv)
 
 
 
-			// save every 100 epoch
-			if (i%50==0 && i>1) {
+			// save every 20 epoch
+			if (i%20==0 && i>1) {
 				stringstream ss;
 				ss << i;
 				string str = "nn_out/neural_"+ss.str()+".net";

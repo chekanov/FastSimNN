@@ -34,7 +34,7 @@ cp -r out_ann out_ann_$XF
 
 
 XF="rfast007"
-echo "#######  Running $XF"
+echo "#######  Running $XF for pileup 40"
 # remove all ANN files if you start a new ANN training
 rm -f out_ann/*
 rm -r out_ann_$XF
@@ -56,7 +56,7 @@ cp -r out_ann out_ann_$XF
 
 
 XF="rfast006"
-echo "#######  Running $XF"
+echo "#######  Running $XF for pileups140"
 DIR=/netapp/data/hepsim/events/pp/14tev/mg5_ttbar_jet/$XF
 # remove all ANN files if you start a new ANN training
 rm -f out_ann/*
