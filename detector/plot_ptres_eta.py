@@ -186,7 +186,7 @@ for i in xrange(len(data1_in)):
 #h2.Scale(1.0/h2.Integral())
 
 ax=h1.GetXaxis(); ax.SetTitleOffset(0.8)
-ax.SetTitle( "(rec-true) / true" );
+ax.SetTitle( "(p_{T}^{rec} - p_{T}^{true})  / p_{T}^{true}" );
 ay=h1.GetYaxis(); ay.SetTitleOffset(0.8)
 ay.SetTitle( "events" );
 ax.SetTitleOffset(1.1); ay.SetTitleOffset(1.4)
