@@ -43,10 +43,14 @@ with open(Outfile, 'w') as outfile:
             outfile.write(firstline)
             nn=0;
             for line in infile:
-                line=line.replace("# ","\n")
-                if (nn>=IStart and nn<IEnd): outfile.write(line)
-                nn=nn+1
-
+                 line=line.replace("# ","\n")
+                 if (nn>=IStart and nn<IEnd): outfile.write(line)
+                 nn=nn+1
+print "Created file with data ",IStart," - ",IEnd," from input with ",nn
 print "Output file written=",Outfile
+if nn<IEnd:
+          print "Error in creating file. Nr of lines=",nn," is less then  max ",IEnd," required"
+          print "Remove the file!"
+          os.remove(Outfile)
 
 

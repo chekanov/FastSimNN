@@ -21,9 +21,9 @@ python2 merger_data_flattener.py /tmp/data.txt $XDIR/jet_pt_v0.d $XDIR/jet_pt_v2
                                  $XDIR/jet_pt_v7.d $XDIR/jet_pt_v8.d $XDIR/jet_pt_v9.d
 
 echo "Make ./data/train.data ./data/test.data ./data/valid.data" 
-python2 merger_get.py 0 2000000        /tmp/data.txt ./data/train.data
-python2 merger_get.py 1000000 2000000  /tmp/data.txt ./data/test.data
-python2 merger_get.py 2000000 3000000  /tmp/data.txt ./data/valid.data
+python2 merger_get.py 1 4000001        /tmp/data.txt ./data/train.data
+python2 merger_get.py 4000001 6000001  /tmp/data.txt ./data/test.data
+python2 merger_get.py 6000001 8000001  /tmp/data.txt ./data/valid.data
 rm -f /tmp/data.txt
 
 # use fake data
