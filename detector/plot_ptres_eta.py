@@ -115,7 +115,7 @@ print "Min value =",xmin," Max value=",xmax
 xmin=-0.5
 xmax=0.5
 
-h1=TH1D("valid","valid", bins, xmin,xmax)
+h1=TH1D("valid1","valid1", bins, xmin,xmax)
 h1.Sumw2()
 h1.SetLineWidth(2)
 h1.SetLineStyle(1)
@@ -123,7 +123,7 @@ h1.SetLineColor(1);
 h1.SetStats(0)
 h1.SetTitle("")
 
-h2=TH1D("neuralnet","neuralnet", bins, xmin,xmax)
+h2=TH1D("neuralnet1","neuralnet1", bins, xmin,xmax)
 h2.Sumw2()
 h2.SetMarkerColor(2)
 h2.SetMarkerSize(0.7)
@@ -135,7 +135,7 @@ h2.SetStats(0)
 h2.SetTitle("")
 
 
-h1b=TH1D("valid","valid", bins, xmin,xmax)
+h1b=TH1D("valid2","valid2", bins, xmin,xmax)
 h1b.Sumw2()
 h1b.SetLineWidth(2)
 h1b.SetLineStyle(1)
@@ -143,7 +143,7 @@ h1b.SetLineColor(4);
 h1b.SetStats(0)
 h1b.SetTitle("")
 
-h2b=TH1D("neuralnet","neuralnet", bins, xmin,xmax)
+h2b=TH1D("neuralnet2","neuralnet2", bins, xmin,xmax)
 h2b.Sumw2()
 h2b.SetMarkerColor(4)
 h2b.SetMarkerSize(0.7)

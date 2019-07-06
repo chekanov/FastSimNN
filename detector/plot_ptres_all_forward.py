@@ -103,6 +103,7 @@ gPad.SetBottomMargin(0.14)
 gPad.SetLeftMargin(0.15)
 gPad.SetRightMargin(0.05)
 
+print "Read:\ndata/test.data\ndata/neuralnet.data" 
 data1_in,data1_out=getData("data/test.data")
 data2_in,data2_out=getData("data/neuralnet.data")
 

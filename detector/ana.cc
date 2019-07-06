@@ -51,7 +51,7 @@ int main(int argc, char **argv)
 	const bool debug=false;
 
 	// how many slices assume slices to divide the phase space for each output 
-	const int maxSlice=120;
+	const int maxSlice=100;
 	cout << "\n\nStart calculations with " << maxSlice << " output slices" << endl;
         // how many slices for input variables 
 	const int maxInSlice=20;
@@ -250,7 +250,9 @@ int main(int argc, char **argv)
 			dataset1->output[ev][maxSlice-1] =v2;
 
 			// prepare new input using grid
+                        // normilzse first 4 values
 			for (int kk=0; kk<numInput; kk++)  dataset1->input[ev][kk]=(input[ev][kk]-cminIN[kk])/(cmaxIN[kk]-cminIN[kk]); // 4 original (rescaled) values
+                        // deal witn the rest
 			int kstart=numInput;
 			for (int jj=0; jj<numInput; jj++) {
 				for (int kk=0; kk<maxInSlice-1; kk++)  {
@@ -312,16 +314,12 @@ int main(int argc, char **argv)
                 } // end rebuilding input validation sample 
 
 
-
-
-
 		cerr << "  input layer:      " << num_input << " units" << endl;
 		cerr << "  hidden layer 1:   " << num_neurons_hidden_1 << "  units" << endl;
 		//cerr << "  hidden layer 2:   " << num_neurons_hidden_2 << "  units" << endl;
 		cerr << "  output layer:     " << num_output << "  units" << endl;
 
 		struct fann *ann = fann_create_standard(num_layers, num_input, num_neurons_hidden_1, num_output);
-
 
 		// scale input. Output does not need to be scaled
 		//fann_scale_input_train_data(dataset1, 0, 1.0);
@@ -468,6 +466,7 @@ int main(int argc, char **argv)
 		//const char* testFile="data/train1.data";
 		cout << "Read test: " << testFile << endl;
 		struct fann_train_data *data = fann_read_train_from_file( testFile );
+                fann_shuffle_train_data(data);
 		// write header file
 		myfile << data->num_data << " " << data->num_input << " " << data->num_output << "\n";
 
@@ -509,6 +508,7 @@ int main(int argc, char **argv)
 			// normalize 4 first values
 			for (int kk=0; kk<numInput; kk++)  uinput[kk]=(input[ev][kk]-cminIN[kk])/(cmaxIN[kk]-cminIN[kk]); // 4 original (rescaled) values
 			int kstart=numInput;
+                        // deal with the rest
 			for (int jj=0; jj<numInput; jj++) {
 				for (int kk=0; kk<maxInSlice-1; kk++)  {
 					uinput[kstart] =InSlice[jj][kk];
